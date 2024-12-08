@@ -4,6 +4,7 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { auth } from "@/lib/firebase";
 import Login from "@/components/Login";
 import Home from "@/components/Home";
+import Add from "./components/Add";
 
 function App() {
 	const [user] = useAuthState(auth);
@@ -12,6 +13,10 @@ function App() {
 			<Routes>
 				<Route path='/' element={<Home />} />
 				<Route path='/login' element={user ? <Navigate to='/' /> : <Login />} />
+				<Route
+					path='/add'
+					element={user ? <Add /> : <Navigate to='/login' />}
+				/>
 			</Routes>
 		</BrowserRouter>
 	);
