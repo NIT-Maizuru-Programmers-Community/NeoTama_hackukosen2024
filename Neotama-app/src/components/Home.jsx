@@ -42,6 +42,13 @@ const Home = () => {
 					/>
 				</div>
 			</main>
+			<div className='fixed bottom-2 right-2 rounded-full text-center ring-offset-blue'>
+				<Button className='w-15 h-15 rounded-full'>
+					<Link to='/add' className='text-2xl'>
+						+
+					</Link>
+				</Button>
+			</div>
 		</div>
 	);
 };
