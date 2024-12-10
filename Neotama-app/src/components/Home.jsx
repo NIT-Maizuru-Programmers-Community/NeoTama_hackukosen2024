@@ -1,12 +1,28 @@
-import React from "react";
+import React, { useEffect } from "react";
 import { useAuthState } from "react-firebase-hooks/auth";
-import { auth } from "@/lib/firebase";
+import { useState } from "react";
+import { auth, db } from "@/lib/firebase";
 import { Button } from "./ui/button";
 import { Link } from "react-router-dom";
 import { signOut } from "firebase/auth";
+import { collection, getDocs } from "firebase/firestore";
 
 const Home = () => {
 	const [user] = useAuthState(auth);
+	const [allDatas, setAllDatas] = useState([]);
+	const getAllDatas = async () => {
+		const querySnapshot = await getDocs(
+			collection(db, "Users", "User1", "Collections")
+		);
+		const allDatas = querySnapshot.docs.map((doc) => {
+			return doc.data();
+		});
+		setAllDatas(allDatas);
+		console.log(allDatas);
+	};
+	useEffect(() => {
+		getAllDatas();
+	}, []);
 	return (
 		<div className='min-h-screen flex flex-col bg-gray-50'>
 			<header className=' shadow-sm text-black text-2xl font-bold p-4 flex justify-between items-center'>
@@ -29,18 +45,8 @@ const Home = () => {
 				</div>
 			</header>
 			<main className='flex flex-col items-center gap-6 p-4 flex-grow'>
-				<div className=''>
-					<img
-						src='/IMG_20241016_154131.jpg'
-						alt='サンプル写真'
-						className=' flex flex-col items-center gap-6 p-4 flex-grow'
-					/>
-					<img
-						src='/IMG_20241016_154131.jpg'
-						alt='サンプル写真'
-						className=' flex flex-col items-center gap-6 p-4 flex-grow'
-					/>
-				</div>
+				{allDatas &&
+					allDatas.map((data, index) => <img src={data.url} key={index} />)}
 			</main>
 			<div className='fixed bottom-2 right-2 rounded-full text-center ring-offset-blue'>
 				<Button className='w-15 h-15 rounded-full'>
