@@ -10,8 +10,19 @@ import random as rnd
 cred = credentials.Certificate("spotApp/token.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
-# FirebaseのドキュメントIDを指定
+#コレクションデータ取得の前処理
 nowToken = db.collection("Hard").document("token")
+# Firebaseのドキュメント作成の前処理
+data={"display_name": "", "id": "", "time_stamp": "", "url": ""}
+#Hardコレクションのデータを全て削除する
+def delete_all_documents_in_collection(collection_name):
+    # Firestoreクライアントを再利用
+    docs = db.collection(collection_name).stream()
+
+    for doc in docs:
+        print(f"Deleting document {doc.id} in collection {collection_name}...")
+        db.collection(collection_name).document(doc.id).delete()
+    print("過去のセッションデータを削除完了。新セッションスタート。")
 
 #---
 #コレクションデータの取り方
@@ -99,10 +110,11 @@ def main(page: ft.Page):
                                 ft.ElevatedButton(
                                     content=ft.Text(
                                         "交換を始める",
-                                        size=50,
+                                        size=70,
                                         font_family="button"
                                     ),
-                                    height=80,
+                                    width=500,
+                                    height=100,
                                     on_click=open_1_token
                                 )
                             ],alignment=ft.MainAxisAlignment.CENTER)
@@ -117,20 +129,69 @@ def main(page: ft.Page):
 
         if page.route == "/01_token":
             #トークン生成
+            delete_all_documents_in_collection("Hard")
             random = rnd.randint(1000,9999)
+            db.collection("Hard").document(str(random)).set(data)
             page.views.append(
                 ft.View(
                     "/01_token",
                     [
-                        page.appbar,
                         ft.Container(
                             content=ft.Column([
                                 ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="maru"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_00_top
+                                )
+                                ], ft.MainAxisAlignment.END),
+                                ft.Row([
                                     ft.Text(
-                                        "トークンを入力してください"
+                                        "トークンをウェアプリで入力してください",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
                                     )
-                                ])
-                            ])
+                                ]),
+                                ft.Row([
+                                    ft.Text(
+                                        "(入力しなくても先には進めます)",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_100
+                                    )
+                                ]),
+                                ft.Row([
+                                    qr,
+                                    ft.Text(
+                                        random,
+                                        size=250,
+                                        color=ft.colors.BLACK,
+                                        font_family="title"
+                                    )
+                                ], ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "次へ進む",
+                                            size=70,
+                                            font_family="button"
+                                        ),
+                                        width=450,
+                                        height=100,
+                                        #onclick
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER)
+                            ], alignment=ft.MainAxisAlignment.START),
+                            width=WIDTH,
+                            height=HEIGHT
                         )
                     ],
                     bgcolor=ft.Colors.GREEN_ACCENT_100
