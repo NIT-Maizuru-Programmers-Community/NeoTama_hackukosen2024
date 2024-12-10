@@ -95,6 +95,7 @@ def main(page: ft.Page):
         src="photo.jpg",
         height=HEIGHT*0.55
     )
+    music = ft.Audio(src="musicKosuke.mp3", autoplay=True)
 
     #-----
     #画面表示部
@@ -331,7 +332,8 @@ def main(page: ft.Page):
             )
 
         if page.route == "/03_photo":
-            take_photo()
+            take_photo(),
+            music.release(),
             page.views.append(
                 ft.View(
                     "/03_photo",
@@ -433,6 +435,9 @@ def main(page: ft.Page):
     #交換画面
     def open_2_exchange(e):
         update_appbar()
+        page.overlay.append(
+            music
+        )
         page.go("/02_exchange")
 
     #2ショット撮影
