@@ -4,6 +4,9 @@ from firebase_admin import firestore
 from firebase_admin import credentials
 import random as rnd
 
+global_token=None
+global display_out
+display_out = "ゲスト"
 #------
 #Firebase初期設定
 #------
@@ -14,6 +17,7 @@ db = firestore.client()
 nowToken = db.collection("Hard").document("token")
 # Firebaseのドキュメント作成の前処理
 data={"display_name": "", "id": "", "time_stamp": "", "url": ""}
+
 #Hardコレクションのデータを全て削除する
 def delete_all_documents_in_collection(collection_name):
     # Firestoreクライアントを再利用
@@ -23,6 +27,21 @@ def delete_all_documents_in_collection(collection_name):
         print(f"Deleting document {doc.id} in collection {collection_name}...")
         db.collection(collection_name).document(doc.id).delete()
     print("過去のセッションデータを削除完了。新セッションスタート。")
+
+# Hardコレクションのデータを全て削除する
+def delete_all_documents_in_collection(collection_name):
+    docs = db.collection(collection_name).stream()
+    for doc in docs:
+        db.collection(collection_name).document(doc.id).delete()
+# Firebaseからユーザーの表示名を取得する関数
+def get_user_display_name(token):
+    try:
+        doc_ref = db.collection("Hard").document(str(token))
+        doc = doc_ref.get().to_dict().get("display_name")
+        return doc
+    except Exception as e:
+        print(f"Error fetching data: {e}")
+        return "エラー"
 
 #---
 #コレクションデータの取り方
@@ -66,28 +85,12 @@ def main(page: ft.Page):
         src="qr.png",
         height=HEIGHT*0.6
     )
-
-    #------
-    #ログイン時のAppBar
-    #------
-    page.appbar = ft.AppBar(
-        leading=ft.Container(
-            ft.Image(src="NeoTama.png", height=BAR_HEIGHT, fit=ft.ImageFit.CONTAIN),
-            margin=ft.margin.only(left=10, top=0, bottom=0),
-            padding=0
-        ),
-        toolbar_height=BAR_HEIGHT,
-        bgcolor=ft.colors.GREEN_ACCENT_200,
-        title=ft.Row([
-            ft.Text(
-                "ネオたま—お年玉v2.0—",
-                font_family="title",
-                color=ft.colors.BLACK,
-                size=40,
-                weight=ft.FontWeight.W_900
-            )
-        ])
+    exchange = ft.Image(
+        src="exchange.png",
+        height=HEIGHT*0.55
     )
+
+
 
     #-----
     #画面表示部
@@ -128,10 +131,6 @@ def main(page: ft.Page):
         )
 
         if page.route == "/01_token":
-            #トークン生成
-            delete_all_documents_in_collection("Hard")
-            random = rnd.randint(1000,9999)
-            db.collection("Hard").document(str(random)).set(data)
             page.views.append(
                 ft.View(
                     "/01_token",
@@ -171,7 +170,7 @@ def main(page: ft.Page):
                                 ft.Row([
                                     qr,
                                     ft.Text(
-                                        random,
+                                        global_token,
                                         size=250,
                                         color=ft.colors.BLACK,
                                         font_family="title"
@@ -186,7 +185,7 @@ def main(page: ft.Page):
                                         ),
                                         width=450,
                                         height=100,
-                                        #onclick
+                                        on_click=open_2_exchange
                                     )
                                 ], alignment=ft.MainAxisAlignment.CENTER)
                             ], alignment=ft.MainAxisAlignment.START),
@@ -198,7 +197,70 @@ def main(page: ft.Page):
                 )
             )
 
+        if page.route == "/02_exchange":
+            page.views.append(
+                ft.View(
+                    "/02_exchange",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "交換し合うものをボックスの中に入れてね",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    ft.Text(
+                                        "(入れたらボタンを押して少し待ってね)",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_100
+                                    )
+                                ]),
+                                ft.Row([
+                                    exchange
+                                ], ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "次へ進む",
+                                            size=70,
+                                            font_family="button"
+                                        ),
+                                        width=450,
+                                        height=100,
+                                        #onclick
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="maru"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_1_token
+                                )
+                                ], alignment=ft.MainAxisAlignment.START),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.Colors.GREEN_ACCENT_100
+                )
+            )
+
         page.update()
+        update_appbar()
 
     #------
     #ページのルーティング
@@ -217,7 +279,18 @@ def main(page: ft.Page):
 
     #トークン発行画面
     def open_1_token(e):
+        delete_all_documents_in_collection("Hard")
+        global global_token
+        global_token = rnd.randint(1000, 9999)
+        data={"display_name": "", "id": "", "time_stamp": "", "url": ""}
+        db.collection("Hard").document(str(global_token)).set(data)
+        update_appbar()
         page.go("/01_token")
+
+    #交換画面
+    def open_2_exchange(e):
+        update_appbar()
+        page.go("/02_exchange")
 
     #------
     #イベントの登録
@@ -229,5 +302,33 @@ def main(page: ft.Page):
     #起動後の処理
     #------
     page.go(page.route)
+
+    #------
+    #ログイン時のAppBar
+    #------
+    # AppBar更新
+    def update_appbar():
+        global display_out
+        if global_token is None:
+            display_out = "ゲスト"  # トークン未生成時のデフォルト
+        else:
+            display_out = get_user_display_name(global_token)
+            if display_out == "":
+                display_out = "ゲスト"
+
+        page.appbar = ft.AppBar(
+            leading=ft.Container(
+                ft.Image(src="NeoTama.png", height=BAR_HEIGHT, fit=ft.ImageFit.CONTAIN),
+                margin=ft.margin.only(left=10)
+            ),
+            toolbar_height=BAR_HEIGHT,
+            bgcolor=ft.colors.GREEN_ACCENT_200,
+            title=ft.Row([
+                ft.Text("ネオたま", font_family="title", color=ft.colors.BLACK, size=40, weight=ft.FontWeight.W_900),
+                ft.Text(f"{display_out}さん", font_family="font", color=ft.colors.BLACK, size=40)
+            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+        )
+        page.update()
+
     
-ft.app(target=main)        
+ft.app(target=main)
