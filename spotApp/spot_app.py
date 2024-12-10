@@ -3,8 +3,10 @@ import firebase_admin
 from firebase_admin import firestore
 from firebase_admin import credentials
 import random as rnd
+from camera import take_photo
 
 global_token=None
+global_token2=None
 global display_out
 display_out = "ゲスト"
 #------
@@ -89,8 +91,10 @@ def main(page: ft.Page):
         src="exchange.png",
         height=HEIGHT*0.55
     )
-
-
+    gakaku = ft.Image(
+        src="photo.jpg",
+        height=HEIGHT*0.55
+    )
 
     #-----
     #画面表示部
@@ -151,7 +155,7 @@ def main(page: ft.Page):
                                 ], ft.MainAxisAlignment.END),
                                 ft.Row([
                                     ft.Text(
-                                        "トークンをウェアプリで入力してください",
+                                        "1人目：トークンをウェアプリで入力してください",
                                         size=60,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -171,6 +175,73 @@ def main(page: ft.Page):
                                     qr,
                                     ft.Text(
                                         global_token,
+                                        size=250,
+                                        color=ft.colors.BLACK,
+                                        font_family="title"
+                                    )
+                                ], ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "次へ進む",
+                                            size=70,
+                                            font_family="button"
+                                        ),
+                                        width=450,
+                                        height=100,
+                                        on_click=open_1_token2
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER)
+                            ], alignment=ft.MainAxisAlignment.START),
+                            width=WIDTH,
+                            height=HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.Colors.GREEN_ACCENT_100
+                )
+            )
+
+        if page.route == "/01_token2":
+            page.views.append(
+                ft.View(
+                    "/01_token2",
+                    [
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "初めから",
+                                        size=25,
+                                        font_family="maru"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_00_top
+                                )
+                                ], ft.MainAxisAlignment.END),
+                                ft.Row([
+                                    ft.Text(
+                                        "2人目：トークンをウェアプリで入力してください",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    ft.Text(
+                                        "(入力しなくても先には進めます)",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_100
+                                    )
+                                ]),
+                                ft.Row([
+                                    qr,
+                                    ft.Text(
+                                        global_token2,
                                         size=250,
                                         color=ft.colors.BLACK,
                                         font_family="title"
@@ -235,7 +306,7 @@ def main(page: ft.Page):
                                         ),
                                         width=450,
                                         height=100,
-                                        #onclick
+                                        on_click=open_3_photo
                                     )
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
@@ -256,6 +327,69 @@ def main(page: ft.Page):
                         )
                     ],
                     bgcolor=ft.Colors.GREEN_ACCENT_100
+                )
+            )
+
+        if page.route == "/03_photo":
+            take_photo()
+            page.views.append(
+                ft.View(
+                    "/03_photo",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "写真を撮ります",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    ft.Text(
+                                        "カメラの画角に収まってね(ボタンを押すとカウントダウンが始まります)",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    gakaku
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "撮影する！",
+                                            size=70,
+                                            font_family="button"
+                                        ),
+                                        width=450,
+                                        height=100,
+                                        #on_click=open_3_photo
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="maru"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_2_exchange
+                                )
+                                ], alignment=ft.MainAxisAlignment.START),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.colors.GREEN_ACCENT_100
                 )
             )
 
@@ -287,10 +421,23 @@ def main(page: ft.Page):
         update_appbar()
         page.go("/01_token")
 
+    #トークン発行画面
+    def open_1_token2(e):
+        global global_token2
+        global_token2 = rnd.randint(1000, 9999)
+        data={"display_name": "", "id": "", "time_stamp": "", "url": ""}
+        db.collection("Hard").document(str(global_token2)).set(data)
+        update_appbar()
+        page.go("/01_token2")
+
     #交換画面
     def open_2_exchange(e):
         update_appbar()
         page.go("/02_exchange")
+
+    #2ショット撮影
+    def open_3_photo(e):
+        page.go("/03_photo")
 
     #------
     #イベントの登録
@@ -309,12 +456,19 @@ def main(page: ft.Page):
     # AppBar更新
     def update_appbar():
         global display_out
+        global display_out2
         if global_token is None:
             display_out = "ゲスト"  # トークン未生成時のデフォルト
         else:
             display_out = get_user_display_name(global_token)
             if display_out == "":
                 display_out = "ゲスト"
+        if global_token2 is None:
+            display_out2 = "ゲスト"  # トークン未生成時のデフォルト
+        else:
+            display_out2 = get_user_display_name(global_token2)
+            if display_out2 == "":
+                display_out2 = "ゲスト"
 
         page.appbar = ft.AppBar(
             leading=ft.Container(
@@ -325,7 +479,7 @@ def main(page: ft.Page):
             bgcolor=ft.colors.GREEN_ACCENT_200,
             title=ft.Row([
                 ft.Text("ネオたま", font_family="title", color=ft.colors.BLACK, size=40, weight=ft.FontWeight.W_900),
-                ft.Text(f"{display_out}さん", font_family="font", color=ft.colors.BLACK, size=40)
+                ft.Text(f"{display_out}さん＆{display_out2}さん", font_family="font", color=ft.colors.BLACK, size=40)
             ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
         )
         page.update()
