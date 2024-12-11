@@ -1,18 +1,33 @@
 import { Input } from "@/components/ui/input";
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Button } from "./ui/button";
-import { useState } from "react";
-import { Link } from "react-router-dom";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+import { Link, useNavigate } from "react-router-dom";
+import {
+	doc,
+	getDoc,
+	updateDoc,
+	getDocs,
+	collection,
+} from "firebase/firestore";
 import { db } from "@/lib/firebase"; // dbのインポートを追加
 import { auth } from "@/lib/firebase";
 import { useAuthState } from "react-firebase-hooks/auth";
+import {
+	Select,
+	SelectContent,
+	SelectItem,
+	SelectTrigger,
+	SelectValue,
+} from "@/components/ui/select";
 
 const Add = () => {
 	const [match, setMatch] = useState(false);
 	const [searchWord, setSearchWord] = useState("");
 	const [imageURL, setImageURL] = useState("");
+	const [exchangers, setExchangers] = useState([]);
+	const [exchangername, setExchangername] = useState("");
 	const [user] = useAuthState(auth);
+	const navigate = useNavigate();
 	const handleSearch = async () => {
 		try {
 			// ドキュメント参照を作成
@@ -40,34 +55,65 @@ const Add = () => {
 			await updateDoc(docRef, {
 				display_name: user.displayName,
 				id: user.uid,
+				name: exchangername,
 			});
+			alert("認証に成功しました");
+			navigate("/");
 		} catch (error) {
 			console.error("データ更新エラー:", error);
 			alert("データの更新に失敗しました");
 		}
 	};
+	const getAllNames = async () => {
+		const querySnapshot = await getDocs(
+			collection(db, "Users", user.uid, "Exchangers")
+		);
+		const exchanges = querySnapshot.docs.map((doc) => {
+			return doc.data();
+		});
+		setExchangers(exchanges);
+		console.log(exchanges);
+	};
+	useEffect(() => {
+		getAllNames();
+	}, []);
+
 	return (
 		<div>
 			<div className='justify-between flex'>
 				<Input
 					className=' ml-2 my-2'
+					placeholder='認証コードを入力'
 					onChange={(e) => setSearchWord(e.target.value)}
 				/>
 				<Button className='mx-2 my-2' onClick={handleSearch}>
 					検索
 				</Button>
 			</div>
+			<div className='w-screen px-2'>
+				<Select onValueChange={(value) => setExchangername(value)}>
+					<SelectTrigger className='w-full'>
+						<SelectValue placeholder='交換相手を選択' />
+					</SelectTrigger>
+					<SelectContent>
+						{exchangers.map((exchanger, index) => (
+							<SelectItem key={index} value={exchanger.name}>
+								{exchanger.name}
+							</SelectItem>
+						))}
+					</SelectContent>
+				</Select>
+			</div>
 			{match && <img src={imageURL} alt='検索結果' className='w-full' />}
-			<div className='w-screen p-5'>
-				{match ? (
-					<Button className='w-full' onClick={handleUpdate}>
+			<div className='w-screen p-2'>
+				{match && (
+					<Button className='w-full my-2' onClick={handleUpdate}>
 						認証する
 					</Button>
-				) : (
-					<Button className='w-full'>
-						<Link to='/'>ホームに戻る</Link>
-					</Button>
 				)}
+				<Button className='w-full'>
+					<Link to='/'>ホームに戻る</Link>
+				</Button>
 			</div>
 		</div>
 	);
