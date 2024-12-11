@@ -3,16 +3,18 @@ import { useAuthState } from "react-firebase-hooks/auth";
 import { useState } from "react";
 import { auth, db } from "@/lib/firebase";
 import { Button } from "./ui/button";
-import { Link } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
+import { Plus } from "lucide-react";
 
 const Home = () => {
 	const [user] = useAuthState(auth);
 	const [allDatas, setAllDatas] = useState([]);
+	const navigate = useNavigate();
 	const getAllDatas = async () => {
 		const querySnapshot = await getDocs(
-			collection(db, "Users", "User1", "Collections")
+			collection(db, "Users", user.uid, "Collections")
 		);
 		const allDatas = querySnapshot.docs.map((doc) => {
 			return doc.data();
@@ -21,8 +23,14 @@ const Home = () => {
 		console.log(allDatas);
 	};
 	useEffect(() => {
-		getAllDatas();
-	}, []);
+		if (user) {
+			getAllDatas();
+		}
+	}, [user]);
+	const handleSignOut = () => {
+		signOut(auth);
+		navigate("/login");
+	};
 	return (
 		<div className='min-h-screen flex flex-col bg-gray-50'>
 			<header className=' shadow-sm text-black text-2xl font-bold p-4 flex justify-between items-center'>
@@ -36,7 +44,7 @@ const Home = () => {
 						/>
 					)}
 					{user ? (
-						<Button onClick={() => signOut(auth)}>Logout</Button>
+						<Button onClick={handleSignOut}>Logout</Button>
 					) : (
 						<Button>
 							<Link to='/login'>Login</Link>
@@ -45,13 +53,14 @@ const Home = () => {
 				</div>
 			</header>
 			<main className='flex flex-col items-center gap-6 p-4 flex-grow'>
+				{allDatas.length === 0 && <p>データがありません</p>}
 				{allDatas &&
 					allDatas.map((data, index) => <img src={data.url} key={index} />)}
 			</main>
 			<div className='fixed bottom-2 right-2 rounded-full text-center ring-offset-blue'>
-				<Button className='w-15 h-15 rounded-full'>
-					<Link to='/add' className='text-2xl'>
-						+
+				<Button className='w-16 h-16 rounded-full'>
+					<Link to='/add' className='flex items-center justify-center'>
+						<Plus size={30} style={{ width: "30px", height: "30px" }} />
 					</Link>
 				</Button>
 			</div>
