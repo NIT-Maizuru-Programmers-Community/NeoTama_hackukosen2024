@@ -5,6 +5,7 @@ import { auth } from "@/lib/firebase";
 import Login from "@/components/Login";
 import Home from "@/components/Home";
 import Add from "@/components/Add";
+import AddPerson from "@/components/AddPerson";
 
 function App() {
 	const [user] = useAuthState(auth);
@@ -16,6 +17,10 @@ function App() {
 				<Route
 					path='/add'
 					element={user ? <Add /> : <Navigate to='/login' />}
+				/>
+				<Route
+					path='/addperson'
+					element={user ? <AddPerson /> : <Navigate to='/login' />}
 				/>
 			</Routes>
 		</BrowserRouter>

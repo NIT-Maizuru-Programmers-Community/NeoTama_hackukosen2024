@@ -6,7 +6,7 @@ import { Button } from "./ui/button";
 import { Link, Navigate, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
-import { Plus } from "lucide-react";
+import { Plus, UserPlus } from "lucide-react";
 
 const Home = () => {
 	const [user] = useAuthState(auth);
@@ -57,6 +57,13 @@ const Home = () => {
 				{allDatas &&
 					allDatas.map((data, index) => <img src={data.url} key={index} />)}
 			</main>
+			<div className='fixed bottom-2 left-2 rounded-full text-center'>
+				<Button className='w-16 h-16 rounded-full'>
+					<Link to='/addperson' className='flex items-center justify-center'>
+						<UserPlus size={30} style={{ width: "30px", height: "30px" }} />
+					</Link>
+				</Button>
+			</div>
 			<div className='fixed bottom-2 right-2 rounded-full text-center ring-offset-blue'>
 				<Button className='w-16 h-16 rounded-full'>
 					<Link to='/add' className='flex items-center justify-center'>
