@@ -4,6 +4,9 @@ from firebase_admin import firestore
 from firebase_admin import credentials
 import random as rnd
 from camera import take_photo
+import time
+import threading
+import csv
 
 global_token=None
 global_token2=None
@@ -44,6 +47,22 @@ def get_user_display_name(token):
     except Exception as e:
         print(f"Error fetching data: {e}")
         return "エラー"
+    
+def monitor_csv(on_change_callback):
+    """
+    CSVファイルを監視して、値が1になったらコールバックを呼び出す。
+    """
+    while True:
+        try:
+            with open("/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/judge.csv", "r") as file:
+                reader = csv.reader(file)
+                for row in reader:
+                    if "1" in row:  # 値が1の場合に画面遷移
+                        on_change_callback()
+                        return  # 1度検出したら監視終了
+        except FileNotFoundError:
+            print(f"CSVファイルが見つかりません")
+        time.sleep(0.5)
 
 #---
 #コレクションデータの取り方
@@ -117,13 +136,13 @@ def main(page: ft.Page):
                             ft.Row([
                                 ft.ElevatedButton(
                                     content=ft.Text(
-                                        "交換を始める",
+                                        "スタート！",
                                         size=70,
                                         font_family="button"
                                     ),
                                     width=500,
                                     height=100,
-                                    on_click=open_1_token
+                                    on_click=open_2_exchange
                                 )
                             ],alignment=ft.MainAxisAlignment.CENTER)
                         ],alignment=ft.MainAxisAlignment.CENTER, spacing=0),
@@ -279,7 +298,7 @@ def main(page: ft.Page):
                             content=ft.Column([
                                 ft.Row([
                                     ft.Text(
-                                        "交換し合うものをボックスの中に入れてね",
+                                        "お年玉をボックスの中に入れてね",
                                         size=60,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -319,7 +338,7 @@ def main(page: ft.Page):
                                     ),
                                     width=120,
                                     height=80,
-                                    on_click=open_1_token
+                                    on_click=open_00_top
                                 )
                                 ], alignment=ft.MainAxisAlignment.START),
                             ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
@@ -334,6 +353,7 @@ def main(page: ft.Page):
         if page.route == "/03_photo":
             take_photo(),
             music.release(),
+            threading.Thread(target=monitor_csv, args=(open_4_mikuji,), daemon=True).start()
             page.views.append(
                 ft.View(
                     "/03_photo",
@@ -343,7 +363,7 @@ def main(page: ft.Page):
                             content=ft.Column([
                                 ft.Row([
                                     ft.Text(
-                                        "写真を撮ります",
+                                        "カメラに向かって「ありがとう」と大きな声でいってみてね！",
                                         size=60,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -352,7 +372,7 @@ def main(page: ft.Page):
                                 ]),
                                 ft.Row([
                                     ft.Text(
-                                        "カメラの画角に収まってね(ボタンを押すとカウントダウンが始まります)",
+                                        "カメラの画角に収まってね",
                                         size=30,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -364,15 +384,53 @@ def main(page: ft.Page):
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     ft.ElevatedButton(
-                                        content=ft.Text(
-                                            "撮影する！",
-                                            size=70,
-                                            font_family="button"
-                                        ),
-                                        width=450,
-                                        height=100,
-                                        #on_click=open_3_photo
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="maru"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_2_exchange
+                                )
+                                ], alignment=ft.MainAxisAlignment.START),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.colors.GREEN_ACCENT_100
+                )
+            )
+
+        if page.route == "/04_mikuji":
+            page.views.append(
+                ft.View(
+                    "/04_mikuji",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "おみくじ結果",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
                                     )
+                                ]),
+                                ft.Row([
+                                    ft.Text(
+                                        "ボックスからお年玉を受け取ろう！",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    gakaku
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     ft.ElevatedButton(
@@ -383,7 +441,7 @@ def main(page: ft.Page):
                                     ),
                                     width=120,
                                     height=80,
-                                    on_click=open_2_exchange
+                                    on_click=open_3_photo
                                 )
                                 ], alignment=ft.MainAxisAlignment.START),
                             ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
@@ -411,6 +469,7 @@ def main(page: ft.Page):
     def open_00_top(e):
         page.views.pop()
         top_view = page.views[0]
+        music.release()
         page.go(top_view.route)
 
     #トークン発行画面
@@ -443,6 +502,10 @@ def main(page: ft.Page):
     #2ショット撮影
     def open_3_photo(e):
         page.go("/03_photo")
+
+    #呪文検知、おみくじ結果出力
+    def open_4_mikuji():
+        page.go("/04_mikuji")
 
     #------
     #イベントの登録
@@ -483,9 +546,8 @@ def main(page: ft.Page):
             toolbar_height=BAR_HEIGHT,
             bgcolor=ft.colors.GREEN_ACCENT_200,
             title=ft.Row([
-                ft.Text("ネオたま", font_family="title", color=ft.colors.BLACK, size=40, weight=ft.FontWeight.W_900),
-                ft.Text(f"{display_out}さん＆{display_out2}さん", font_family="font", color=ft.colors.BLACK, size=40)
-            ], alignment=ft.MainAxisAlignment.SPACE_BETWEEN)
+                ft.Text("ネオたま", font_family="title", color=ft.colors.BLACK, size=40, weight=ft.FontWeight.W_900)
+            ])
         )
         page.update()
 
