@@ -292,6 +292,7 @@ def main(page: ft.Page):
                 )
             )
 
+        #お年玉投入＆すだれダウン
         if page.route == "/02_exchange":
             page.views.append(
                 ft.View(
@@ -302,7 +303,7 @@ def main(page: ft.Page):
                             content=ft.Column([
                                 ft.Row([
                                     ft.Text(
-                                        "お年玉をボックスの中に入れてね",
+                                        "お年玉をボックスの中に入れてください",
                                         size=60,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -354,8 +355,9 @@ def main(page: ft.Page):
                 )
             )
 
+        #拍手検知
         if page.route == "/03_photo":
-            take_photo(),
+            #take_photo(),
             music.release(),
             threading.Thread(target=monitor_csv, args=(open_4_mikuji,), daemon=True).start()
             page.views.append(
@@ -367,7 +369,7 @@ def main(page: ft.Page):
                             content=ft.Column([
                                 ft.Row([
                                     ft.Text(
-                                        "カメラに向かって「ありがとう」と大きな声でいってみてね！",
+                                        "手を2回叩いてみよう！",
                                         size=60,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
