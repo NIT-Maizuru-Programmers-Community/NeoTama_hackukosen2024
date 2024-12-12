@@ -25,12 +25,11 @@ def generate_omikuji_image(background_image_path, font_path, omikuji_result, out
         wrapped_text = "\n".join(textwrap.wrap(omikuji_result, width=8))
 
         # テキストサイズを計算（幅と高さを取得）
-        text_width, text_height = draw.multiline_textsize(wrapped_text, font=font)
+        text_bbox = draw.textbbox((0, 0), wrapped_text, font=font)
+        text_width, text_height = text_bbox[2] - text_bbox[0], text_bbox[3] - text_bbox[1]
         image_width, image_height = background.size
-
-        # テキストの描画位置を計算（中央揃え）
         text_x = (image_width - text_width) // 2
-        text_y = (image_height - text_height) // 2
+        text_y = 250#(image_height - text_height) // 2
 
         # テキストの色を設定（黒色）
         text_color = (0, 0, 0, 255)  # RGBA形式（完全不透明の黒）
