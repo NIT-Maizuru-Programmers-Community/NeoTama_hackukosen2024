@@ -99,7 +99,8 @@ def main(page: ft.Page):
     def monitor_clap(callback_function):
         while True:
             if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
-                open_4_mikuji
+                break
+            open_4_mikuji
 
     #------
     #各パーツの定義
