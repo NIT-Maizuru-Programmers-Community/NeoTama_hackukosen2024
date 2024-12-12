@@ -691,7 +691,7 @@ def main(page: ft.Page):
             friendly_score= FriendlyApp()
             page.views.append(
                 ft.View(
-                    "/04_mikuji",
+                    "/05_friendly",
                     [
                         page.appbar,
                         ft.Container(
@@ -716,6 +716,57 @@ def main(page: ft.Page):
                                 ]),
                                 ft.Row([
                                     friendly_score
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="button"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_4_mikuji_e
+                                )
+                                ], alignment=ft.MainAxisAlignment.START),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.colors.GREEN_ACCENT_100
+                )
+            )
+            page.update()
+            tm_gm = threading.Timer(5, lambda: open_6_completed())
+            tm_gm.start()
+
+        #戻るボタン未実装
+        if page.route == "/06_completed":
+            page.views.append(
+                ft.View(
+                    "/06_completed",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "測定完了！",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    ft.Text(
+                                        "2人の親密度をはかります",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
                                 ]),
                                 ft.Row([
                                     ft.ElevatedButton(
@@ -749,7 +800,6 @@ def main(page: ft.Page):
                     bgcolor=ft.colors.GREEN_ACCENT_100
                 )
             )
-            page.update()
 
         page.update()
         update_appbar()
@@ -813,8 +863,13 @@ def main(page: ft.Page):
     def open_4_mikuji_e(e):
         page.go("/04_mikuji")
 
+    #親密度計算
     def open_5_friendly(e):
         page.go("/05_friendly")
+
+    #親密度結果
+    def open_6_completed():
+        page.go("/06_completed")
 
     #------
     #イベントの登録
