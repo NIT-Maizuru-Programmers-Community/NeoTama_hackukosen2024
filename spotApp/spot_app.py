@@ -10,8 +10,8 @@ import time
 import threading
 import csv
 import cv2
-from PIL import Image
-import io
+from time import sleep
+import base64
 
 
 global_token=None
@@ -70,6 +70,41 @@ def monitor_csv(on_change_callback):
             print(f"CSVファイルが見つかりません")
         time.sleep(0.5)
 
+class CameraCaptureControl(ft.UserControl):
+    def __init__(self):
+        super().__init__()
+        self.capture = cv2.VideoCapture(0)
+        self.latency = 1 / self.capture.get(cv2.CAP_PROP_FPS)
+
+    def did_mount(self):
+        self.running = True
+        self.thread = threading.Thread(target=self.update_frame, args=(), daemon=True)
+        self.thread.start()
+
+    def will_unmount(self):
+        self.running = False
+
+    def update_frame(self):
+        while self.capture.isOpened() and self.running:
+            retval, frame = self.capture.read()
+            if not retval:
+                print("フレームを取得できませんでした")
+                continue
+            retval, frame = cv2.imencode(".jpg", frame)
+            data = base64.b64encode(frame)
+            self.image_control.src_base64 = data.decode()
+            self.update()
+            sleep(self.latency)
+
+    def build(self):
+        self.image_control = ft.Image(
+            width=self.capture.get(cv2.CAP_PROP_FRAME_WIDTH),
+            height=self.capture.get(cv2.CAP_PROP_FRAME_HEIGHT),
+            fit=ft.ImageFit.FIT_WIDTH,
+        )
+        return self.image_control
+
+
 #---
 #コレクションデータの取り方
 #data = nowToken.get().to_dict()
@@ -111,37 +146,6 @@ def main(page: ft.Page):
             if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
                 break
         open_3_photo()
-
-    # カメラからの画像を取得して、Fletアプリに表示するための関数
-    def show_camera_feed(page: ft.Page, image_widget: ft.Image):
-        cap = cv2.VideoCapture(0)  # デフォルトのカメラを使用
-        if not cap.isOpened():
-            print("カメラが開けませんでした")
-            return
-
-        while True:
-            ret, frame = cap.read()  # 1フレーム取得
-            if not ret:
-                print("フレームを取得できませんでした")
-                break
-
-            # OpenCVのBGR形式からRGB形式に変換
-            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-            # Pillowで画像を作成
-            pil_img = Image.fromarray(frame_rgb)
-        
-            # Pillow画像をバイナリデータに変換
-            with io.BytesIO() as byte_io:
-                pil_img.save(byte_io, format="PNG")
-                byte_data = byte_io.getvalue()
-
-            # FletのImageウィジェットに画像を設定
-            image_widget.src = byte_data
-            page.update()  # FletのUIを更新
-
-        cap.release()
-
 
     #------
     #各パーツの定義
@@ -475,7 +479,7 @@ def main(page: ft.Page):
             )
 
         if page.route == "/04_mikuji":
-            image_widget=ft.Image(src=None, width=640, height=480)
+            camera_control = CameraCaptureControl()
             page.views.append(
                 ft.View(
                     "/04_mikuji",
@@ -502,7 +506,7 @@ def main(page: ft.Page):
                                     )
                                 ]),
                                 ft.Row([
-                                    image_widget
+                                    camera_control
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     ft.ElevatedButton(
@@ -534,7 +538,6 @@ def main(page: ft.Page):
                     bgcolor=ft.colors.GREEN_ACCENT_100
                 )
             )
-            threading.Thread(target=show_camera_feed, args=(page, image_widget), daemon=True).start()
             page.update()
 
         page.update()
