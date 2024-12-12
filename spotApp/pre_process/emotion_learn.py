@@ -79,7 +79,7 @@ model.summary()
 with tf.device('/GPU:0'):
     history = model.fit(
         train_generator,
-        epochs=25,
+        epochs=100,
         validation_data=test_generator
     )
 
