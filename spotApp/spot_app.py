@@ -535,6 +535,7 @@ def main(page: ft.Page):
                 )
             )
             threading.Thread(target=show_camera_feed, args=(page, image_widget), daemon=True).start()
+            page.update()
 
         page.update()
         update_appbar()
