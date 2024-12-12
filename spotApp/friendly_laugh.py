@@ -79,63 +79,66 @@ def calculate_affinity(smile_score1, smile_score2, gaze_match, mirroring_score, 
     )
     return affinity_score * 100  #0～100にスケール
 
-#カメラの初期化
-cap = cv2.VideoCapture(2)
+def friendly_main():
+    #カメラの初期化
+    cap = cv2.VideoCapture(2)
 
-with mp_face_mesh.FaceMesh(
-    max_num_faces=2,  #最大2人分の顔を検出
-    refine_landmarks=True,
-    min_detection_confidence=0.5,
-    min_tracking_confidence=0.5
-) as face_mesh:
-    while cap.isOpened():
-        success, image = cap.read()
-        if not success:
-            print("カメラからのフレームを取得できませんでした。")
-            break
+    with mp_face_mesh.FaceMesh(
+        max_num_faces=2,  #最大2人分の顔を検出
+        refine_landmarks=True,
+        min_detection_confidence=0.5,
+        min_tracking_confidence=0.5
+    ) as face_mesh:
+        while cap.isOpened():
+            success, image = cap.read()
+            if not success:
+                print("カメラからのフレームを取得できませんでした。")
+                break
 
-        #画像をRGBに変換
-        image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
-        image.flags.writeable = False
-        results = face_mesh.process(image)
+            #画像をRGBに変換
+            image = cv2.cvtColor(image, cv2.COLOR_BGR2RGB)
+            image.flags.writeable = False
+            results = face_mesh.process(image)
 
-        #ランドマークの描画
-        image.flags.writeable = True
-        image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
+            #ランドマークの描画
+            image.flags.writeable = True
+            image = cv2.cvtColor(image, cv2.COLOR_RGB2BGR)
 
-        if results.multi_face_landmarks and len(results.multi_face_landmarks) == 2:
-            #2人の顔ランドマークを取得
-            face1 = results.multi_face_landmarks[0]
-            face2 = results.multi_face_landmarks[1]
+            if results.multi_face_landmarks and len(results.multi_face_landmarks) == 2:
+                #2人の顔ランドマークを取得
+                face1 = results.multi_face_landmarks[0]
+                face2 = results.multi_face_landmarks[1]
 
-            #各特徴量を計算
-            smile1 = calculate_smile_score(face1)
-            print(smile1)
-            smile2 = calculate_smile_score(face2)
-            print(smile2)
-            gaze1 = calculate_gaze_direction(face1)
-            gaze2 = calculate_gaze_direction(face2)
-            gaze_match = calculate_gaze_match(gaze1, gaze2)
-            print(gaze_match)
-            mirroring = calculate_mirroring_score(face1, face2)
-            print(mirroring)
-            center1 = calculate_face_center(face1)
-            center2 = calculate_face_center(face2)
-            physical_distance = calculate_physical_distance(center1, center2)
-            distance_score = calculate_distance_score(physical_distance)
-            print(distance_score)
+                #各特徴量を計算
+                smile1 = calculate_smile_score(face1)
+                print(smile1)
+                smile2 = calculate_smile_score(face2)
+                print(smile2)
+                gaze1 = calculate_gaze_direction(face1)
+                gaze2 = calculate_gaze_direction(face2)
+                gaze_match = calculate_gaze_match(gaze1, gaze2)
+                print(gaze_match)
+                mirroring = calculate_mirroring_score(face1, face2)
+                print(mirroring)
+                center1 = calculate_face_center(face1)
+                center2 = calculate_face_center(face2)
+                physical_distance = calculate_physical_distance(center1, center2)
+                distance_score = calculate_distance_score(physical_distance)
+                print(distance_score)
 
-            #親密度スコアの計算
-            affinity = calculate_affinity(smile1, smile2, gaze_match, mirroring, distance_score)
+                #親密度スコアの計算
+                affinity = calculate_affinity(smile1, smile2, gaze_match, mirroring, distance_score)
 
-            #親密度スコアを表示
-            cv2.putText(image, f"親密度: {affinity:.2f}", (50, 50),
-                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
+                #親密度スコアを表示
+                cv2.putText(image, f"friendly: {affinity:.2f}", (50, 50),
+                            cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2, cv2.LINE_AA)
 
-        #画像を表示
-        cv2.imshow('Face Affinity', image)
-        if cv2.waitKey(5) & 0xFF == 27:  # ESCキーで終了
-            break
+            #画像を表示
+            cv2.imshow('Face Affinity', image)
+            if cv2.waitKey(5) & 0xFF == 27:  # ESCキーで終了
+                break
 
-cap.release()
-cv2.destroyAllWindows()
+    cap.release()
+    cv2.destroyAllWindows()
+
+friendly_main()
