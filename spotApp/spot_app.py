@@ -100,7 +100,7 @@ def main(page: ft.Page):
         while True:
             if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
                 break
-            open_4_mikuji
+        open_4_mikuji
 
     #------
     #各パーツの定義
