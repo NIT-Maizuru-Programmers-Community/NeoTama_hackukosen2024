@@ -15,7 +15,7 @@ display_out = "ゲスト"
 #------
 #Firebase初期設定
 #------
-cred = credentials.Certificate("spotApp/token.json")
+cred = credentials.Certificate("token.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 #コレクションデータ取得の前処理
@@ -89,10 +89,10 @@ def main(page: ft.Page):
     page.window_full_screen = True
     page.window_always_on_top = True
     page.fonts = {
-        "font": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/DotGothic16-Regular.ttf",
+        "button": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/DotGothic16-Regular.ttf",
         "maru": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/MPLUSRounded1c-Regular.ttf",
         "title": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/DelaGothicOne-Regular.ttf",
-        "button": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/YujiMai-Regular.ttf"
+        #"button": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/YujiMai-Regular.ttf"
     }
 
     #------
