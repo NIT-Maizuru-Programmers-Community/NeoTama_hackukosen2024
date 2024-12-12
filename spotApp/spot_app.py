@@ -89,6 +89,7 @@ def main(page: ft.Page):
     page.window_resizable = True
     page.window_full_screen = True
     page.window_always_on_top = True
+    page.window_prevent_close = True
     page.fonts = {
         "button": "spotApp/DotGothic16-Regular.ttf",
         "maru": "spotApp/MPLUSRounded1c-Medium.ttf",
@@ -490,7 +491,7 @@ def main(page: ft.Page):
     #------
     #終了
     def exit_app(e):
-        sys.exit()
+        page.window.destroy()
 
     #現在のページを削除して前のページに戻る
     def view_pop(e):
