@@ -245,7 +245,7 @@ class FriendlyApp(ft.UserControl):
             if value != 0:
                 with open("spotApp/friendly.csv", mode='a', newline='', encoding='utf-8') as file:
                     writer = csv.writer(file)
-                    writer.writerow(value)
+                    writer.writerow([value])
             print(self.affinity_text.value)
             self.update()
             sleep(self.latency)
@@ -870,6 +870,8 @@ def main(page: ft.Page):
 
     #親密度計算
     def open_5_friendly(e):
+        with open("spotApp/friendly.csv", mode='w', newline='') as file:
+            pass
         page.go("/05_friendly")
 
     #親密度結果
