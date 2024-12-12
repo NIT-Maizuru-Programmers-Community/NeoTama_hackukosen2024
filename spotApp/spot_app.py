@@ -100,6 +100,7 @@ def main(page: ft.Page):
         while True:
             if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
                 break
+        open_4_mikuji()
 
     #------
     #各パーツの定義
@@ -382,7 +383,7 @@ def main(page: ft.Page):
         if page.route == "/03_photo":
             #take_photo(),
             music.release(),
-            threading.Thread(target=monitor_clap, args=(open_4_mikuji,), daemon=True).start()
+            threading.Thread(target=monitor_clap, args=(wait_hands_clap,), daemon=True).start()
             page.views.append(
                 ft.View(
                     "/03_photo",
