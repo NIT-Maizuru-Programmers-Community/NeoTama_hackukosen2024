@@ -39,5 +39,6 @@ def wait_hands_clap():
             cnt += 1
         else:
             cnt = 0
+        if cnt == 2:
+            return True
     print("clap!")
-    return True
