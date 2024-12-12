@@ -70,36 +70,6 @@ def monitor_csv(on_change_callback):
             print(f"CSVファイルが見つかりません")
         time.sleep(0.5)
 
-# カメラからの画像を取得して、Fletアプリに表示するための関数
-def show_camera_feed(page: ft.Page, image_widget: ft.Image):
-    cap = cv2.VideoCapture(0)  # デフォルトのカメラを使用
-    if not cap.isOpened():
-        print("カメラが開けませんでした")
-        return
-
-    while True:
-        ret, frame = cap.read()  # 1フレーム取得
-        if not ret:
-            print("フレームを取得できませんでした")
-            break
-
-        # OpenCVのBGR形式からRGB形式に変換
-        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
-
-        # Pillowで画像を作成
-        pil_img = Image.fromarray(frame_rgb)
-        
-        # Pillow画像をバイナリデータに変換
-        with io.BytesIO() as byte_io:
-            pil_img.save(byte_io, format="PNG")
-            byte_data = byte_io.getvalue()
-
-        # FletのImageウィジェットに画像を設定
-        image_widget.src = byte_data
-        page.update()  # FletのUIを更新
-
-    cap.release()
-
 #---
 #コレクションデータの取り方
 #data = nowToken.get().to_dict()
@@ -141,6 +111,37 @@ def main(page: ft.Page):
             if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
                 break
         open_3_photo()
+
+    # カメラからの画像を取得して、Fletアプリに表示するための関数
+    def show_camera_feed(page: ft.Page, image_widget: ft.Image):
+        cap = cv2.VideoCapture(0)  # デフォルトのカメラを使用
+        if not cap.isOpened():
+            print("カメラが開けませんでした")
+            return
+
+        while True:
+            ret, frame = cap.read()  # 1フレーム取得
+            if not ret:
+                print("フレームを取得できませんでした")
+                break
+
+            # OpenCVのBGR形式からRGB形式に変換
+            frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+            # Pillowで画像を作成
+            pil_img = Image.fromarray(frame_rgb)
+        
+            # Pillow画像をバイナリデータに変換
+            with io.BytesIO() as byte_io:
+                pil_img.save(byte_io, format="PNG")
+                byte_data = byte_io.getvalue()
+
+            # FletのImageウィジェットに画像を設定
+            image_widget.src = byte_data
+            page.update()  # FletのUIを更新
+
+        cap.release()
+
 
     #------
     #各パーツの定義
