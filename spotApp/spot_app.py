@@ -66,11 +66,6 @@ def monitor_csv(on_change_callback):
             print(f"CSVファイルが見つかりません")
         time.sleep(0.5)
 
-def monitor_clap(callback_function):
-    while True:
-        if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
-            return
-
 #---
 #コレクションデータの取り方
 #data = nowToken.get().to_dict()
@@ -101,6 +96,10 @@ def main(page: ft.Page):
         "maru": "spotApp/MPLUSRounded1c-Medium.ttf",
         "title": "spotApp/DelaGothicOne-Regular.ttf",
     }
+    def monitor_clap(callback_function):
+        while True:
+            if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
+                open_4_mikuji
 
     #------
     #各パーツの定義
@@ -383,7 +382,7 @@ def main(page: ft.Page):
         if page.route == "/03_photo":
             #take_photo(),
             music.release(),
-            threading.Thread(target=monitor_clap, args=(open_4_mikuji,), daemon=True).start()
+            threading.Thread(target=monitor_clap, args=(wait_hands_clap,), daemon=True).start()
             page.views.append(
                 ft.View(
                     "/03_photo",
