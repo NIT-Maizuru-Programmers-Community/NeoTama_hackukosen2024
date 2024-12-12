@@ -21,7 +21,7 @@ db = firestore.client()
 #コレクションデータ取得の前処理
 nowToken = db.collection("Hard").document("token")
 # Firebaseのドキュメント作成の前処理
-data={"display_name": "", "id": "", "time_stamp": "", "url": ""}
+data={"display_name": "", "id": "", "time_stamp": "", "url": "", "name": ""}
 
 #Hardコレクションのデータを全て削除する
 def delete_all_documents_in_collection(collection_name):
@@ -115,6 +115,10 @@ def main(page: ft.Page):
         height=HEIGHT*0.55
     )
     music = ft.Audio(src="musicKosuke.mp3", autoplay=True)
+    mikuji_result = ft.Image(
+        src="mikuji_result.jpg",
+        height=HEIGHT*0.6
+    )
 
     #-----
     #画面表示部
@@ -159,23 +163,12 @@ def main(page: ft.Page):
                 ft.View(
                     "/01_token",
                     [
+                        page.appbar,
                         ft.Container(
                             content=ft.Column([
                                 ft.Row([
-                                    ft.ElevatedButton(
-                                    content=ft.Text(
-                                        "もどる",
-                                        size=25,
-                                        font_family="maru"
-                                    ),
-                                    width=120,
-                                    height=80,
-                                    on_click=open_00_top
-                                )
-                                ], ft.MainAxisAlignment.END),
-                                ft.Row([
                                     ft.Text(
-                                        "1人目：トークンをウェアプリで入力してください",
+                                        "トークンをウェアプリで入力してください",
                                         size=60,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -184,7 +177,7 @@ def main(page: ft.Page):
                                 ]),
                                 ft.Row([
                                     ft.Text(
-                                        "(入力しなくても先には進めます)",
+                                        "(ウェブアプリで操作完了後に次へを押してください。",
                                         size=30,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -208,13 +201,25 @@ def main(page: ft.Page):
                                             font_family="button"
                                         ),
                                         width=450,
-                                        height=100,
+                                        height=95,
                                         on_click=open_1_token2
                                     )
-                                ], alignment=ft.MainAxisAlignment.CENTER)
-                            ], alignment=ft.MainAxisAlignment.START),
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="maru"
+                                    ),
+                                    width=120,
+                                    height=75,
+                                    on_click=open_4_mikuji_e
+                                )
+                                ], ft.MainAxisAlignment.START),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
                             width=WIDTH,
-                            height=HEIGHT
+                            height=HEIGHT-BAR_HEIGHT
                         )
                     ],
                     bgcolor=ft.Colors.GREEN_ACCENT_100
@@ -430,20 +435,30 @@ def main(page: ft.Page):
                                     )
                                 ]),
                                 ft.Row([
-                                    gakaku
+                                    mikuji_result
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     ft.ElevatedButton(
-                                    content=ft.Text(
-                                        "もどる",
-                                        size=25,
-                                        font_family="maru"
+                                        content=ft.Text(
+                                            "終了する",
+                                            size=70,
+                                            font_family="button"
+                                        ),
+                                        width=450,
+                                        height=100,
+                                        on_click=open_00_top
                                     ),
-                                    width=120,
-                                    height=80,
-                                    on_click=open_3_photo
-                                )
-                                ], alignment=ft.MainAxisAlignment.START),
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "お年玉ボックスに覚えさせる",
+                                            size=70,
+                                            font_family="button"
+                                        ),
+                                        width=1000,
+                                        height=100,
+                                        on_click=open_1_token
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
                             ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
                             width=WIDTH,
                             height=HEIGHT - BAR_HEIGHT
@@ -505,6 +520,10 @@ def main(page: ft.Page):
 
     #呪文検知、おみくじ結果出力
     def open_4_mikuji():
+        page.go("/04_mikuji")
+
+    #呪文検知、おみくじ結果出力
+    def open_4_mikuji_e(e):
         page.go("/04_mikuji")
 
     #------

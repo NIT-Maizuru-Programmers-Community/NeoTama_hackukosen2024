@@ -2,3 +2,4 @@ venv
 token.json
 .DS_Store
 photo.jpg
+emotion_train_data/
