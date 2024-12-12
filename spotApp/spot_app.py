@@ -242,7 +242,10 @@ class FriendlyApp(ft.UserControl):
             self.image_control.src_base64 = data
             self.affinity_text.value = f"親密度: {affinity:.2f}"
             value = int(affinity)
-            print(value)
+            if value != 0:
+                with open("spotApp/friendly.csv", mdoe='a', newline='', encoding='utf-8') as file:
+                    writer = csv.writer(file)
+                    writer.writerow(value)
             print(self.affinity_text.value)
             self.update()
             sleep(self.latency)
