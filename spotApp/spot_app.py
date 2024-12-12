@@ -241,6 +241,7 @@ class FriendlyApp(ft.UserControl):
             data = base64.b64encode(buffer).decode()
             self.image_control.src_base64 = data
             self.affinity_text.value = f"親密度: {affinity:.2f}"
+            print(self.affinity_text.value)
             self.update()
             sleep(self.latency)
 
