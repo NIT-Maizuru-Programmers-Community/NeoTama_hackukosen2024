@@ -533,7 +533,6 @@ def main(page: ft.Page):
                     bgcolor=ft.colors.GREEN_ACCENT_100
                 )
             )
-            page.add(image_widget)
             threading.Thread(target=show_camera_feed, args=(page, image_widget), daemon=True).start()
 
         page.update()
