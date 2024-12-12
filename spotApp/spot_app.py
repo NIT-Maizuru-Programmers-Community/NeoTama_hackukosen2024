@@ -66,10 +66,11 @@ def monitor_csv(on_change_callback):
             print(f"CSVファイルが見つかりません")
         time.sleep(0.5)
 
-def monitor_clap(on_change_callback):
+def monitor_clap(callback_function, transition_function):
     while True:
-        if wait_hands_clap() == True:
-            break
+        if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
+            transition_function()  # Trueの場合に画面遷移の関数を呼び出す
+            break  # 必要に応じてループを抜ける
 
 #---
 #コレクションデータの取り方
