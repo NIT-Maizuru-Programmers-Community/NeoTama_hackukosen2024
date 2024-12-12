@@ -7,6 +7,7 @@ from camera import take_photo
 import time
 import threading
 import csv
+import sys
 
 global_token=None
 global_token2=None
@@ -54,7 +55,7 @@ def monitor_csv(on_change_callback):
     """
     while True:
         try:
-            with open("/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/judge.csv", "r") as file:
+            with open("spotApp/judge.csv", "r") as file:
                 reader = csv.reader(file)
                 for row in reader:
                     if "1" in row:  # 値が1の場合に画面遷移
@@ -89,9 +90,9 @@ def main(page: ft.Page):
     page.window_full_screen = True
     page.window_always_on_top = True
     page.fonts = {
-        "button": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/DotGothic16-Regular.ttf",
-        "maru": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/MPLUSRounded1c-Regular.ttf",
-        "title": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/DelaGothicOne-Regular.ttf",
+        "button": "spotApp/DotGothic16-Regular.ttf",
+        "maru": "spotApp/MPLUSRounded1c-Medium.ttf",
+        "title": "spotApp/DelaGothicOne-Regular.ttf",
     }
 
     #------
@@ -147,7 +148,19 @@ def main(page: ft.Page):
                                     height=100,
                                     on_click=open_2_exchange
                                 )
-                            ],alignment=ft.MainAxisAlignment.CENTER)
+                            ],alignment=ft.MainAxisAlignment.CENTER),
+                            ft.Row([
+                                ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "終了",
+                                        size=25,
+                                        font_family="button"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=exit_app
+                                )
+                            ],alignment=ft.MainAxisAlignment.END),
                         ],alignment=ft.MainAxisAlignment.CENTER, spacing=0),
                         width=WIDTH,
                         height=HEIGHT
@@ -475,6 +488,10 @@ def main(page: ft.Page):
     #------
     #ページのルーティング
     #------
+    #終了
+    def exit_app(e):
+        sys.exit()
+
     #現在のページを削除して前のページに戻る
     def view_pop(e):
         page.views.pop()
