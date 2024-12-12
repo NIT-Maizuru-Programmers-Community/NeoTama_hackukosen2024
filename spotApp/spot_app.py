@@ -243,7 +243,7 @@ class FriendlyApp(ft.UserControl):
             self.affinity_text.value = f"親密度: {affinity:.2f}"
             value = int(affinity)
             if value != 0:
-                with open("spotApp/friendly.csv", mdoe='a', newline='', encoding='utf-8') as file:
+                with open("spotApp/friendly.csv", mode='a', newline='', encoding='utf-8') as file:
                     writer = csv.writer(file)
                     writer.writerow(value)
             print(self.affinity_text.value)
