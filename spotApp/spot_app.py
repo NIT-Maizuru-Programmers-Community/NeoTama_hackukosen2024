@@ -9,7 +9,10 @@ from friendly_laugh import friendly_main
 import time
 import threading
 import csv
-import sys
+import cv2
+from PIL import Image
+import io
+
 
 global_token=None
 global_token2=None
@@ -66,6 +69,36 @@ def monitor_csv(on_change_callback):
         except FileNotFoundError:
             print(f"CSVファイルが見つかりません")
         time.sleep(0.5)
+
+# カメラからの画像を取得して、Fletアプリに表示するための関数
+def show_camera_feed(page: ft.Page, image_widget: ft.Image):
+    cap = cv2.VideoCapture(0)  # デフォルトのカメラを使用
+    if not cap.isOpened():
+        print("カメラが開けませんでした")
+        return
+
+    while True:
+        ret, frame = cap.read()  # 1フレーム取得
+        if not ret:
+            print("フレームを取得できませんでした")
+            break
+
+        # OpenCVのBGR形式からRGB形式に変換
+        frame_rgb = cv2.cvtColor(frame, cv2.COLOR_BGR2RGB)
+
+        # Pillowで画像を作成
+        pil_img = Image.fromarray(frame_rgb)
+        
+        # Pillow画像をバイナリデータに変換
+        with io.BytesIO() as byte_io:
+            pil_img.save(byte_io, format="PNG")
+            byte_data = byte_io.getvalue()
+
+        # FletのImageウィジェットに画像を設定
+        image_widget.src = byte_data
+        page.update()  # FletのUIを更新
+
+    cap.release()
 
 #---
 #コレクションデータの取り方
@@ -441,7 +474,7 @@ def main(page: ft.Page):
             )
 
         if page.route == "/04_mikuji":
-            threading.Thread(target=monitor_friendly, args=(friendly_main,), daemon=True).start()
+            image_widget=ft.Image(src=None, width=640, height=480)
             page.views.append(
                 ft.View(
                     "/04_mikuji",
@@ -468,7 +501,7 @@ def main(page: ft.Page):
                                     )
                                 ]),
                                 ft.Row([
-                                    mikuji_result
+                                    image_widget
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     ft.ElevatedButton(
@@ -500,6 +533,8 @@ def main(page: ft.Page):
                     bgcolor=ft.colors.GREEN_ACCENT_100
                 )
             )
+            page.add(image_widget)
+            threading.Thread(target=show_camera_feed, args=(page, image_widget), daemon=True).start()
 
         page.update()
         update_appbar()
