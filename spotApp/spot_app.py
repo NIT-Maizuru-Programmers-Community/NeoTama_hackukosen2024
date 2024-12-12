@@ -15,7 +15,7 @@ display_out = "ゲスト"
 #------
 #Firebase初期設定
 #------
-cred = credentials.Certificate("/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/token.json")
+cred = credentials.Certificate("token.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 #コレクションデータ取得の前処理
