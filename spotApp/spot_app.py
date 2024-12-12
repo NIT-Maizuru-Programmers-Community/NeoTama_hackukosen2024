@@ -757,7 +757,7 @@ def main(page: ft.Page):
                             content=ft.Column([
                                 ft.Row([
                                     ft.Text(
-                                        "測定完了！",
+                                        "測定完了！お年玉を受け取ってね！",
                                         size=60,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -766,7 +766,7 @@ def main(page: ft.Page):
                                 ]),
                                 ft.Row([
                                     ft.Text(
-                                        "2人の親密度をはかります",
+                                        "バッジが付与されました！",
                                         size=30,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -776,7 +776,7 @@ def main(page: ft.Page):
                                 ft.Row([
                                     ft.ElevatedButton(
                                         content=ft.Text(
-                                            "撮影開始！",
+                                            "お年玉ボックスにに記憶させる",
                                             size=70,
                                             font_family="button"
                                         ),
@@ -788,13 +788,13 @@ def main(page: ft.Page):
                                 ft.Row([
                                     ft.ElevatedButton(
                                     content=ft.Text(
-                                        "もどる",
+                                        "終了する",
                                         size=25,
                                         font_family="button"
                                     ),
                                     width=120,
                                     height=80,
-                                    on_click=open_4_mikuji_e
+                                    on_click=open_00_top
                                 )
                                 ], alignment=ft.MainAxisAlignment.START),
                             ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
@@ -876,6 +876,7 @@ def main(page: ft.Page):
 
     #親密度結果
     def open_6_completed():
+        take_photo()
         page.go("/06_completed")
 
     #------

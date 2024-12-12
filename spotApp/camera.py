@@ -5,7 +5,7 @@ import time
 # 写真撮影関数
 def take_photo():
     # カメラを開く
-    cap = cv2.VideoCapture(2)  # ここでカメラのIDを指定
+    cap = cv2.VideoCapture(0)  # ここでカメラのIDを指定
 
     # カメラが正常に開かれたか確認
     if not cap.isOpened():
