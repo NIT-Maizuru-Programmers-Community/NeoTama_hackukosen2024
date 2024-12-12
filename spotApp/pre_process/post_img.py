@@ -7,8 +7,8 @@ def upload_image(image_path, server_url):
     return response
 
 # 例: 画像のアップロード
-image_path = "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/test_program/mikuji_result.jpg"
-server_url = "http://tk2-109-55757.vs.sakura.ne.jp//upload.php"
+image_path = "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/pre_process/mikuji.png"
+server_url = "https://tk2-109-55757.vs.sakura.ne.jp//upload.php"
 response = upload_image(image_path, server_url)
 
 if response.status_code == 200:

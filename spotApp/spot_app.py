@@ -15,7 +15,7 @@ display_out = "ゲスト"
 #------
 #Firebase初期設定
 #------
-cred = credentials.Certificate("token.json")
+cred = credentials.Certificate("/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/token.json")
 firebase_admin.initialize_app(cred)
 db = firestore.client()
 #コレクションデータ取得の前処理
@@ -92,7 +92,6 @@ def main(page: ft.Page):
         "button": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/DotGothic16-Regular.ttf",
         "maru": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/MPLUSRounded1c-Regular.ttf",
         "title": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/DelaGothicOne-Regular.ttf",
-        #"button": "/Users/hiratasoma/Documents/NeoTama_hackukosen2024/spotApp/YujiMai-Regular.ttf"
     }
 
     #------
@@ -210,7 +209,7 @@ def main(page: ft.Page):
                                     content=ft.Text(
                                         "もどる",
                                         size=25,
-                                        font_family="maru"
+                                        font_family="button"
                                     ),
                                     width=120,
                                     height=75,
@@ -339,7 +338,7 @@ def main(page: ft.Page):
                                     content=ft.Text(
                                         "もどる",
                                         size=25,
-                                        font_family="maru"
+                                        font_family="button"
                                     ),
                                     width=120,
                                     height=80,
@@ -392,7 +391,7 @@ def main(page: ft.Page):
                                     content=ft.Text(
                                         "もどる",
                                         size=25,
-                                        font_family="maru"
+                                        font_family="button"
                                     ),
                                     width=120,
                                     height=80,
