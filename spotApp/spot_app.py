@@ -246,7 +246,7 @@ class FriendlyApp(ft.UserControl):
             sleep(self.latency)
 
     def build(self):
-        self.image_control = ft.Image(width=640, height=480, fit=ft.ImageFit.FIT_WIDTH)
+        self.image_control = ft.Image(width=840, height=600, fit=ft.ImageFit.FIT_WIDTH)
         self.affinity_text = ft.Text(value="親密度: 計算中...", size=20)
         return ft.Column(controls=[self.image_control, self.affinity_text])
 
