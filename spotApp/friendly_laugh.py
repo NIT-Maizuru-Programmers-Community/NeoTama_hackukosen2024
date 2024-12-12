@@ -140,5 +140,3 @@ def friendly_main():
 
     cap.release()
     cv2.destroyAllWindows()
-
-friendly_main()
