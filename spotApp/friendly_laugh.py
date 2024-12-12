@@ -81,7 +81,7 @@ def calculate_affinity(smile_score1, smile_score2, gaze_match, mirroring_score, 
 
 def friendly_main():
     #カメラの初期化
-    cap = cv2.VideoCapture(2)
+    cap = cv2.VideoCapture(0)
 
     with mp_face_mesh.FaceMesh(
         max_num_faces=2,  #最大2人分の顔を検出
