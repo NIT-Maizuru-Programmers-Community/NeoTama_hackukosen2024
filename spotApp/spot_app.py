@@ -4,6 +4,7 @@ from firebase_admin import firestore
 from firebase_admin import credentials
 import random as rnd
 from camera import take_photo
+from clap import wait_hands_clap
 import time
 import threading
 import csv
@@ -65,6 +66,11 @@ def monitor_csv(on_change_callback):
             print(f"CSVファイルが見つかりません")
         time.sleep(0.5)
 
+def monitor_clap(on_change_callback):
+    while True:
+        if wait_hands_clap() == True:
+            break
+
 #---
 #コレクションデータの取り方
 #data = nowToken.get().to_dict()
@@ -120,6 +126,10 @@ def main(page: ft.Page):
         src="mikuji_result.jpg",
         height=HEIGHT*0.6
     )
+    clap = ft.Image(
+        src="clap.gif",
+        height=HEIGHT*0.55
+    )
 
     #-----
     #画面表示部
@@ -161,7 +171,7 @@ def main(page: ft.Page):
                                     height=80,
                                     on_click=exit_app
                                 )
-                            ],alignment=ft.MainAxisAlignment.END),
+                            ],alignment=ft.MainAxisAlignment.START),
                         ],alignment=ft.MainAxisAlignment.CENTER, spacing=0),
                         width=WIDTH,
                         height=HEIGHT
@@ -373,7 +383,7 @@ def main(page: ft.Page):
         if page.route == "/03_photo":
             #take_photo(),
             music.release(),
-            threading.Thread(target=monitor_csv, args=(open_4_mikuji,), daemon=True).start()
+            threading.Thread(target=monitor_clap, args=(open_4_mikuji,), daemon=True).start()
             page.views.append(
                 ft.View(
                     "/03_photo",
@@ -383,7 +393,7 @@ def main(page: ft.Page):
                             content=ft.Column([
                                 ft.Row([
                                     ft.Text(
-                                        "手を2回叩いてみよう！",
+                                        "てを2回たたいてみよう！",
                                         size=60,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -392,7 +402,7 @@ def main(page: ft.Page):
                                 ]),
                                 ft.Row([
                                     ft.Text(
-                                        "カメラの画角に収まってね",
+                                        "タイミングよくたたいてね",
                                         size=30,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -400,7 +410,7 @@ def main(page: ft.Page):
                                     )
                                 ]),
                                 ft.Row([
-                                    gakaku
+                                    clap
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     ft.ElevatedButton(
