@@ -41,5 +41,3 @@ def wait_hands_clap():
             cnt = 0
     print("clap!")
     return True
-
-wait_hands_clap()
