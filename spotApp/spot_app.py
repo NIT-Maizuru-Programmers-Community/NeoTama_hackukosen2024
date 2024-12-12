@@ -511,17 +511,67 @@ def main(page: ft.Page):
                                 ft.Row([
                                     ft.ElevatedButton(
                                         content=ft.Text(
-                                            "終了する",
+                                            "撮影開始！",
                                             size=70,
                                             font_family="button"
                                         ),
-                                        width=450,
+                                        width=1000,
                                         height=100,
-                                        on_click=open_00_top
+                                        on_click=open_5_friendly
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="button"
                                     ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_3_photo
+                                )
+                                ], alignment=ft.MainAxisAlignment.START),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.colors.GREEN_ACCENT_100
+                )
+            )
+            page.update()
+
+        if page.route == "/05_friendly":
+            page.views.append(
+                ft.View(
+                    "/04_mikuji",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "測定中！",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    ft.Text(
+                                        "2人の親密度をはかります",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
                                     ft.ElevatedButton(
                                         content=ft.Text(
-                                            "お年玉ボックスに覚えさせる",
+                                            "撮影開始！",
                                             size=70,
                                             font_family="button"
                                         ),
@@ -530,6 +580,18 @@ def main(page: ft.Page):
                                         on_click=open_1_token
                                     )
                                 ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="button"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_2_exchange
+                                )
+                                ], alignment=ft.MainAxisAlignment.START),
                             ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
                             width=WIDTH,
                             height=HEIGHT - BAR_HEIGHT
@@ -601,6 +663,9 @@ def main(page: ft.Page):
     #呪文検知、おみくじ結果出力
     def open_4_mikuji_e(e):
         page.go("/04_mikuji")
+
+    def open_5_friendly(e):
+        page.go("/05_friendly")
 
     #------
     #イベントの登録
