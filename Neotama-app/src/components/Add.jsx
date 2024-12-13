@@ -8,6 +8,8 @@ import {
 	updateDoc,
 	getDocs,
 	collection,
+	setDoc,
+	addDoc,
 } from "firebase/firestore";
 import { db } from "@/lib/firebase"; // dbのインポートを追加
 import { auth } from "@/lib/firebase";
@@ -28,6 +30,7 @@ const Add = () => {
 	const [exchangername, setExchangername] = useState("");
 	const [user] = useAuthState(auth);
 	const navigate = useNavigate();
+	const [data, setData] = useState();
 	const handleSearch = async () => {
 		try {
 			// ドキュメント参照を作成
@@ -36,6 +39,7 @@ const Add = () => {
 
 			if (docSnap.exists()) {
 				const data = docSnap.data();
+				setData(data);
 				setMatch(true);
 				setImageURL(data.url); // ドキュメント内のurlフィールドを取得
 			} else {
@@ -48,9 +52,13 @@ const Add = () => {
 			alert("データの取得に失敗しました");
 		}
 	};
-	const handleUpdate = async () => {
+	const handleUpload = async () => {
 		try {
 			// ドキュメント参照を作成
+			if (exchangername === "") {
+				alert("交換相手を選択してください");
+				return;
+			}
 			const docRef = doc(db, "Hard", searchWord); // "Hard"コレクション内の特定のドキュメントIDを指定
 			await updateDoc(docRef, {
 				display_name: user.displayName,
@@ -58,11 +66,21 @@ const Add = () => {
 				name: exchangername,
 			});
 			alert("認証に成功しました");
+			submitAdd();
 			navigate("/");
 		} catch (error) {
 			console.error("データ更新エラー:", error);
 			alert("データの更新に失敗しました");
 		}
+	};
+	const submitAdd = async () => {
+		await addDoc(collection(db, "Users", user.uid, "Collections"), {
+			display_name: data.display_name,
+			id: data.id,
+			name: data.name,
+			time_stamp: data.time_stamp,
+			url: data.url,
+		});
 	};
 	const getAllNames = async () => {
 		const querySnapshot = await getDocs(
@@ -107,7 +125,7 @@ const Add = () => {
 			{match && <img src={imageURL} alt='検索結果' className='w-full' />}
 			<div className='w-screen p-2'>
 				{match && (
-					<Button className='w-full my-2' onClick={handleUpdate}>
+					<Button className='w-full my-2' onClick={handleUpload}>
 						認証する
 					</Button>
 				)}

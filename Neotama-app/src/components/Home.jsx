@@ -55,7 +55,9 @@ const Home = () => {
 			<main className='flex flex-col items-center gap-6 p-4 flex-grow'>
 				{allDatas.length === 0 && <p>データがありません</p>}
 				{allDatas &&
-					allDatas.map((data, index) => <img src={data.url} key={index} />)}
+					allDatas.map((data, index) => (
+						<img src={data.url} key={index} className=' shadow-md' />
+					))}
 			</main>
 			<div className='fixed bottom-2 left-2 rounded-full text-center'>
 				<Button className='w-16 h-16 rounded-full'>

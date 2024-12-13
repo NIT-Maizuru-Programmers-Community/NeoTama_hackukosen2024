@@ -48,7 +48,7 @@ const AddPerson = () => {
 			<div className='justify-between flex'>
 				<Input
 					className=' ml-2 my-2'
-					placeholder='追加する交換相手の名前を入力'
+					placeholder='追加する渡す相手の名前を入力'
 					onChange={(e) => setAddWord(e.target.value)}
 					value={addWord}
 				/>
