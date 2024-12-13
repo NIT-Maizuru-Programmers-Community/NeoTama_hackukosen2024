@@ -311,6 +311,10 @@ def main(page: ft.Page):
         height=HEIGHT*0.6
     )
     exchange = ft.Image(
+        src="otoshidama.jpg",
+        height=HEIGHT*0.55
+    )
+    end = ft.Image(
         src="exchange.png",
         height=HEIGHT*0.55
     )
@@ -857,6 +861,58 @@ def main(page: ft.Page):
             )
             page.update()
 
+        if page.route == "/08_end_nologin":
+            camera_control = CameraCaptureControl()
+            page.views.append(
+                ft.View(
+                    "/07_failed",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "使ってくれてありがとう！",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.Text(
+                                        "また来年お待ちしています",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    end
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "はじめにもどる",
+                                            size=70,
+                                            font_family="button"
+                                        ),
+                                        width=1000,
+                                        height=100,
+                                        on_click=open_00_top
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.colors.GREEN_ACCENT_100
+                )
+            )
+            page.update()
+
         page.update()
         update_appbar()
 
@@ -950,6 +1006,7 @@ def main(page: ft.Page):
     def open_7_failed():
         page.go("/07_failed")
 
+    #ログインなし終了画面
     def open_8_end_nologin():
         page.go("/08_end_nologin")
 
