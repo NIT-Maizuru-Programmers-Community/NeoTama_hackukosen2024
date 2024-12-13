@@ -36,8 +36,6 @@ void setup() {
   pinMode(IN1, OUTPUT);
   pinMode(IN2, OUTPUT);
   pinMode(LED_BUILTIN, OUTPUT);
-
-  Serial.println("セットアップ完了: LEDおよびサーボ制御が可能です。");
 }
 
 void loop() {
@@ -118,7 +116,7 @@ void setAllPixels(uint32_t color) {
 void open() {
   digitalWrite(IN1, HIGH); 
   digitalWrite(IN2, LOW);
-  delay(5100);                        // 5.5秒動作
+  delay(4950);                        // 5.5秒動作
 
   digitalWrite(IN1, LOW); 
   digitalWrite(IN2, LOW);
@@ -129,7 +127,7 @@ void close() {
   digitalWrite(LED_BUILTIN, HIGH);    // LEDを点灯
   digitalWrite(IN1, LOW); 
   digitalWrite(IN2, HIGH);
-  delay(5050);                        // 5.6秒動作
+  delay(4900);                        // 5.6秒動作
 
   digitalWrite(LED_BUILTIN, LOW);     // LEDを消灯
   digitalWrite(IN1, LOW); 

@@ -26,6 +26,8 @@ global_token=None
 global_token2=None
 global display_out
 display_out = "ゲスト"
+global sudare
+sudare = 0
 #------
 #Firebase初期設定
 #------
@@ -270,6 +272,7 @@ def main(page: ft.Page):
     WIDTH = 1920
     HEIGHT = 1080
     BAR_HEIGHT = HEIGHT * 0.08
+    global sudare
 
     page.title = "NeoTama SpotApp"
     page.window_minimizable = False
@@ -339,6 +342,13 @@ def main(page: ft.Page):
 
         # ランダムに1つ選択
         return random.choice(image_files)
+    
+    def overwrite_csv(numbers):
+        # CSVファイルを空にして、新しい内容で書き込む
+        with open("spotApp/judge.csv", mode='w', newline='', encoding='utf-8') as file:
+            writer = csv.writer(file)
+            for number in numbers:
+                writer.writerow([number])  # 数字を一行ずつ書き込む
 
     #------
     #各パーツの定義
@@ -557,6 +567,8 @@ def main(page: ft.Page):
 
         #お年玉投入＆すだれダウン
         if page.route == "/02_exchange":
+            numbers = [4, 8]
+            overwrite_csv(numbers)
             page.views.append(
                 ft.View(
                     "/02_exchange",
@@ -662,6 +674,8 @@ def main(page: ft.Page):
             
 
         if page.route == "/04_mikuji":
+            numbers = [2, 9]
+            overwrite_csv(numbers)
             camera_control = CameraCaptureControl()
             page.views.append(
                 ft.View(
@@ -888,6 +902,8 @@ def main(page: ft.Page):
             page.update()
 
         if page.route == "/08_end_nologin":
+            numbers = [4, 8]
+            overwrite_csv(numbers)
             page.views.append(
                 ft.View(
                     "/08_end_nologin",
@@ -1051,6 +1067,8 @@ def main(page: ft.Page):
         page.views.pop()
         top_view = page.views[0]
         music.release()
+        numbers = [2, 9]
+        overwrite_csv(numbers)
         page.go(top_view.route)
 
     #トークン発行画面
@@ -1117,7 +1135,8 @@ def main(page: ft.Page):
                 average = int(sum(values) / len(values))
                 print("親密度：" + str(average))
                 out_avr=str(average) + "%"
-                generate_omikuji_image("spotApp/assets/badge.jpg", "spotApp/DelaGothicOne-Regular.ttf", out_avr, "spotApp/assets/budge_result.jpg")
+                shutil.copy("spotApp/assets/goshuin/"+str(average)+ ".jpg", "spotApp/assets/budge_result.jpg")
+                #generate_omikuji_image("spotApp/assets/badge.jpg", "spotApp/DelaGothicOne-Regular.ttf", out_avr, "spotApp/assets/budge_result.jpg")
                 page.go("/06_completed")
             else:
                 page.go("/07_failed")
