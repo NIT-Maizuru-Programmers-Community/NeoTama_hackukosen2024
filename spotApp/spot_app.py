@@ -241,7 +241,7 @@ class FriendlyApp(ft.UserControl):
             data = base64.b64encode(buffer).decode()
             self.image_control.src_base64 = data
             self.affinity_text.value = f"親密度: {affinity:.2f}"
-            value = int(affinity)
+            value = int(affinity) * 2
             if value != 0:
                 with open("spotApp/friendly.csv", mode='a', newline='', encoding='utf-8') as file:
                     writer = csv.writer(file)
@@ -324,6 +324,10 @@ def main(page: ft.Page):
     clap = ft.Image(
         src="clap.gif",
         height=HEIGHT*0.55
+    )
+    count_down = ft.Image(
+        src="countDown.gif",
+        height=HEIGHT*0.2
     )
 
     #-----
@@ -550,7 +554,7 @@ def main(page: ft.Page):
                                         ),
                                         width=450,
                                         height=100,
-                                        on_click=open_3_photo
+                                        on_click=open_4_mikuji_e
                                     )
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
@@ -679,7 +683,7 @@ def main(page: ft.Page):
                                     ),
                                     width=120,
                                     height=80,
-                                    on_click=open_3_photo
+                                    on_click=open_2_exchange
                                 )
                                 ], alignment=ft.MainAxisAlignment.START),
                             ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
@@ -702,23 +706,15 @@ def main(page: ft.Page):
                         ft.Container(
                             content=ft.Column([
                                 ft.Row([
+                                    count_down,
                                     ft.Text(
                                         "測定中！",
-                                        size=60,
+                                        size=100,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
                                         weight=ft.FontWeight.W_900
                                     )
-                                ]),
-                                ft.Row([
-                                    ft.Text(
-                                        "2人の親密度をはかります",
-                                        size=30,
-                                        color=ft.colors.BLACK,
-                                        font_family="maru",
-                                        weight=ft.FontWeight.W_900
-                                    )
-                                ]),
+                                ], alignment=ft.MainAxisAlignment.START),
                                 ft.Row([
                                     friendly_score
                                 ], alignment=ft.MainAxisAlignment.CENTER),
@@ -806,6 +802,70 @@ def main(page: ft.Page):
                 )
             )
 
+        if page.route == "/07_failed":
+            camera_control = CameraCaptureControl()
+            page.views.append(
+                ft.View(
+                    "/07_failed",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "測定失敗",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    ft.Text(
+                                        "2人でもう一度撮影しましょう",
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ]),
+                                ft.Row([
+                                    camera_control
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "撮影開始！",
+                                            size=70,
+                                            font_family="button"
+                                        ),
+                                        width=1000,
+                                        height=100,
+                                        on_click=open_5_friendly
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "もどる",
+                                        size=25,
+                                        font_family="button"
+                                    ),
+                                    width=120,
+                                    height=80,
+                                    on_click=open_2_exchange
+                                )
+                                ], alignment=ft.MainAxisAlignment.START),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.colors.GREEN_ACCENT_100
+                )
+            )
+            page.update()
+
         page.update()
         update_appbar()
 
@@ -877,7 +937,25 @@ def main(page: ft.Page):
     #親密度結果
     def open_6_completed():
         take_photo()
-        page.go("/06_completed")
+        with open("spotApp/friendly.csv", mode='r') as file:
+            reader = csv.reader(file)
+            values=[]
+            for row in reader:
+                if row:
+                    try:
+                        values.append(float(row[0]))
+                    except ValueError:
+                        print(f"無効な値をスキップしました: {row[0]}")
+            if values:
+                average = int(sum(values) / len(values))
+                print("親密度：" + str(average))
+                page.go("/06_completed")
+            else:
+                page.go("/07_failed")
+
+    #撮影失敗
+    def open_7_failed():
+        page.go("/07_failed")
 
     #------
     #イベントの登録
