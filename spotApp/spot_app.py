@@ -4,17 +4,23 @@ from firebase_admin import firestore
 from firebase_admin import credentials
 import random as rnd
 from camera import take_photo
-from clap import wait_hands_clap
+from bpf_fft2 import wait_hands_clap
 from mikuji import generate_omikuji_image
+from post_img import upload_image
 import time
+from datetime import datetime
 import threading
 import csv
+import os
+os.environ["OPENCV_VIDEOIO_MSMF_ENABLE_HW_TRANSFORMS"] = "0"
 import cv2
 from time import sleep
 import base64
 import mediapipe as mp
 import numpy as np
-
+import pytz
+import shutil
+import random
 
 global_token=None
 global_token2=None
@@ -31,27 +37,18 @@ nowToken = db.collection("Hard").document("token")
 # Firebaseのドキュメント作成の前処理
 data={"display_name": "", "id": "", "time_stamp": "", "url": "", "name": ""}
 
-#Hardコレクションのデータを全て削除する
-def delete_all_documents_in_collection(collection_name):
-    # Firestoreクライアントを再利用
-    docs = db.collection(collection_name).stream()
-
-    for doc in docs:
-        print(f"Deleting document {doc.id} in collection {collection_name}...")
-        db.collection(collection_name).document(doc.id).delete()
-    print("過去のセッションデータを削除完了。新セッションスタート。")
-
 # Hardコレクションのデータを全て削除する
 def delete_all_documents_in_collection(collection_name):
     docs = db.collection(collection_name).stream()
     for doc in docs:
         db.collection(collection_name).document(doc.id).delete()
-# Firebaseからユーザーの表示名を取得する関数
+# FirebaseからユーザーID名，渡す相手を取得する関数
 def get_user_display_name(token):
     try:
         doc_ref = db.collection("Hard").document(str(token))
-        doc = doc_ref.get().to_dict().get("display_name")
-        return doc
+        uid = doc_ref.get().to_dict().get("id")
+        name = doc_ref.get().to_dict().get("name")
+        return uid, name
     except Exception as e:
         print(f"Error fetching data: {e}")
         return "エラー"
@@ -299,6 +296,50 @@ def main(page: ft.Page):
                 break
         open_3_photo()
 
+    #記憶用フォルダ作成
+    def create_folder_if_not_exists(folder_path):
+        # フォルダが存在するか確認
+        if not os.path.exists(folder_path):
+            # フォルダが存在しなければ作成
+            os.makedirs(folder_path)
+            print(f"フォルダ '{folder_path}' を作成しました。")
+        else:
+            print(f"フォルダ '{folder_path}' は既に存在します。")
+
+    #画像をメモリアルに保存
+    def copy_images_with_timestamp(image_paths, destination_folder):
+        # 保存先フォルダが存在しない場合は作成
+        if not os.path.exists(destination_folder):
+            os.makedirs(destination_folder)
+    
+        # 現在の日時を取得してフォーマット
+        timestamp = datetime.now(pytz.timezone('Asia/Tokyo')).strftime("%Y%m%d%H%M%S")
+        # 画像の拡張子を取得
+        _, extension = os.path.splitext(image_paths)
+        # 新しいファイル名を作成
+        new_filename = f"{timestamp}{extension}"  # 例: 20241224122520.png
+        destination_path = os.path.join(destination_folder, new_filename)
+        # 画像をコピー
+        shutil.copy(image_paths, destination_path)
+        print(f"{image_paths} を {destination_path} にコピーしました。")
+
+    def get_random_image_path(folder_path, image_extensions=(".jpg", ".png", ".jpeg")):
+        if not os.path.isdir(folder_path):
+            raise ValueError(f"The path {folder_path} is not a valid directory.")
+
+        # 指定された拡張子の画像ファイルを収集
+        image_files = [
+            os.path.join(folder_path, file_name)
+            for file_name in os.listdir(folder_path)
+            if os.path.isfile(os.path.join(folder_path, file_name)) and file_name.lower().endswith(image_extensions)
+        ]
+
+        if not image_files:
+            return None  # 画像ファイルが存在しない場合
+
+        # ランダムに1つ選択
+        return random.choice(image_files)
+
     #------
     #各パーツの定義
     #------
@@ -334,6 +375,11 @@ def main(page: ft.Page):
     count_down = ft.Image(
         src="countDown.gif",
         height=HEIGHT*0.2
+    )
+    framed_image = ft.Container(
+        content=CameraCaptureControl(),
+        border=ft.border.all(5, "red"),
+        border_radius=10
     )
 
     #-----
@@ -405,7 +451,7 @@ def main(page: ft.Page):
                                 ]),
                                 ft.Row([
                                     ft.Text(
-                                        "(ウェブアプリで操作完了後に次へを押してください。",
+                                        "(ウェブアプリで操作完了後に次へを押してください。)",
                                         size=30,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -430,21 +476,9 @@ def main(page: ft.Page):
                                         ),
                                         width=450,
                                         height=95,
-                                        on_click=open_1_token2
+                                        on_click=open_9_memory
                                     )
-                                ], alignment=ft.MainAxisAlignment.CENTER),
-                                ft.Row([
-                                    ft.ElevatedButton(
-                                    content=ft.Text(
-                                        "もどる",
-                                        size=25,
-                                        font_family="button"
-                                    ),
-                                    width=120,
-                                    height=75,
-                                    on_click=open_4_mikuji_e
-                                )
-                                ], ft.MainAxisAlignment.START),
+                                ], alignment=ft.MainAxisAlignment.CENTER)
                             ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
                             width=WIDTH,
                             height=HEIGHT-BAR_HEIGHT
@@ -625,6 +659,7 @@ def main(page: ft.Page):
                     bgcolor=ft.colors.GREEN_ACCENT_100
                 )
             )
+            
 
         if page.route == "/04_mikuji":
             camera_control = CameraCaptureControl()
@@ -654,7 +689,7 @@ def main(page: ft.Page):
                                     )
                                 ]),
                                 ft.Row([
-                                    camera_control
+                                    framed_image
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     ft.ElevatedButton(
@@ -702,7 +737,7 @@ def main(page: ft.Page):
                                 ft.Row([
                                     count_down,
                                     ft.Text(
-                                        "【測定中】笑顔で取ると親密度アップ！",
+                                        "測定中!笑顔で取ると御朱印レベルが上昇",
                                         size=90,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
@@ -747,17 +782,8 @@ def main(page: ft.Page):
                             content=ft.Column([
                                 ft.Row([
                                     ft.Text(
-                                        "測定完了！お年玉を受け取ってね！",
+                                        "測定完了！御朱印ゲット！",
                                         size=60,
-                                        color=ft.colors.BLACK,
-                                        font_family="maru",
-                                        weight=ft.FontWeight.W_900
-                                    )
-                                ]),
-                                ft.Row([
-                                    ft.Text(
-                                        "バッジが付与されました！",
-                                        size=30,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
                                         weight=ft.FontWeight.W_900
@@ -779,7 +805,7 @@ def main(page: ft.Page):
                                     ),
                                     ft.ElevatedButton(
                                         content=ft.Text(
-                                            "今日の思い出を覚えさせる",
+                                            "御朱印登録",
                                             size=60,
                                             font_family="button"
                                         ),
@@ -862,10 +888,9 @@ def main(page: ft.Page):
             page.update()
 
         if page.route == "/08_end_nologin":
-            camera_control = CameraCaptureControl()
             page.views.append(
                 ft.View(
-                    "/07_failed",
+                    "/08_end_nologin",
                     [
                         page.appbar,
                         ft.Container(
@@ -873,7 +898,7 @@ def main(page: ft.Page):
                                 ft.Row([
                                     ft.Text(
                                         "使ってくれてありがとう！",
-                                        size=60,
+                                        size=80,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
                                         weight=ft.FontWeight.W_900
@@ -882,7 +907,7 @@ def main(page: ft.Page):
                                 ft.Row([
                                     ft.Text(
                                         "また来年お待ちしています",
-                                        size=30,
+                                        size=50,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
                                         weight=ft.FontWeight.W_900
@@ -913,6 +938,98 @@ def main(page: ft.Page):
             )
             page.update()
 
+        if page.route == "/09_memory":
+            result = get_user_display_name(global_token)
+            uid_in = result[0]
+            name_in = result[1]
+            path_nm = os.path.join("spotApp", "assets", "archive", uid_in, name_in)
+            create_folder_if_not_exists(path_nm)
+            copy_images_with_timestamp("spotApp/assets/photo.jpg", str(path_nm))
+            page.views.append(
+                ft.View(
+                    "/09_memory",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "御朱印と取った写真を登録中です",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.Text(
+                                        name_in,
+                                        size=30,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    badge,
+                                    photo
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.colors.GREEN_ACCENT_100
+                )
+            )
+            tm_gm = threading.Timer(3, lambda: open_10_show())
+            tm_gm.start()
+            page.update()
+
+        if page.route == "/10_show":
+            result = get_user_display_name(global_token)
+            uid_in = result[0]
+            name_in = result[1]
+            path_nm = os.path.join("spotApp", "assets", "archive", uid_in, name_in)
+            random_file = get_random_image_path(path_nm)
+            page.views.append(
+                ft.View(
+                    "/10_show",
+                    [
+                        page.appbar,
+                        ft.Container(
+                            content=ft.Column([
+                                ft.Row([
+                                    ft.Text(
+                                        "過去の思い出",
+                                        size=60,
+                                        color=ft.colors.BLACK,
+                                        font_family="maru",
+                                        weight=ft.FontWeight.W_900
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                    ft.Image(random_file),
+                                ], alignment=ft.MainAxisAlignment.CENTER),
+                                ft.Row([
+                                ft.ElevatedButton(
+                                    content=ft.Text(
+                                        "お年玉をゲット",
+                                        size=25,
+                                        font_family="button"
+                                    ),
+                                    on_click=open_3_photo
+                                )
+                            ],alignment=ft.MainAxisAlignment.CENTER),
+                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                            width=WIDTH,
+                            height=HEIGHT - BAR_HEIGHT
+                        )
+                    ],
+                    bgcolor=ft.colors.GREEN_ACCENT_100
+                )
+            )
+
         page.update()
         update_appbar()
 
@@ -941,7 +1058,10 @@ def main(page: ft.Page):
         delete_all_documents_in_collection("Hard")
         global global_token
         global_token = rnd.randint(1000, 9999)
-        data={"display_name": "", "id": "", "time_stamp": "", "url": ""}
+        img_response = upload_image("spotApp/assets/budge_result.jpg", "https://tk2-109-55757.vs.sakura.ne.jp//upload.php")
+        img_url = img_response.text
+        time_stp = datetime.now(pytz.timezone('Asia/Tokyo'))
+        data={"display_name": "", "id": "", "time_stamp": time_stp, "url": img_url}
         db.collection("Hard").document(str(global_token)).set(data)
         update_appbar()
         page.go("/01_token")
@@ -1009,6 +1129,13 @@ def main(page: ft.Page):
     #ログインなし終了画面
     def open_8_end_nologin():
         page.go("/08_end_nologin")
+
+    #記憶手続き画面
+    def open_9_memory(e):
+        page.go("/09_memory")
+
+    def open_10_show():
+        page.go("/10_show")
 
     #------
     #イベントの登録
