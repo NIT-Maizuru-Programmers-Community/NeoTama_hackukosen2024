@@ -50,9 +50,7 @@ def generate_omikuji_image(background_image_path, font_path, omikuji_result, out
         print(f"エラーが発生しました: {e}")
 
 # 使用例
-background_image_path = "spotApp/assets/badge.jpg"
-font_path = "spotApp/DelaGothicOne-Regular.ttf"
-omikuji_result = "50%"
-output_image_path = "spotApp/assets/budge_result.jpg"
-
-generate_omikuji_image(background_image_path, font_path, omikuji_result, output_image_path)
+#background_image_path = "spotApp/assets/badge.jpg"
+#font_path = "spotApp/DelaGothicOne-Regular.ttf"
+#omikuji_result = "50%"
+#output_image_path = "spotApp/assets/budge_result.jpg"

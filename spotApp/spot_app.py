@@ -5,6 +5,7 @@ from firebase_admin import credentials
 import random as rnd
 from camera import take_photo
 from clap import wait_hands_clap
+from mikuji import generate_omikuji_image
 import time
 import threading
 import csv
@@ -285,11 +286,12 @@ def main(page: ft.Page):
         "maru": "spotApp/MPLUSRounded1c-Medium.ttf",
         "title": "spotApp/DelaGothicOne-Regular.ttf",
     }
+    #ログインなし時
     def monitor_clap(callback_function):
         while True:
             if callback_function():  # 関数を呼び出して結果がTrueかどうか確認
                 break
-        open_4_mikuji()
+        open_8_end_nologin()
 
     def monitor_friendly(callback_function):
         while True:
@@ -312,14 +314,14 @@ def main(page: ft.Page):
         src="exchange.png",
         height=HEIGHT*0.55
     )
-    gakaku = ft.Image(
+    photo = ft.Image(
         src="photo.jpg",
         height=HEIGHT*0.55
     )
     music = ft.Audio(src="musicKosuke.mp3", autoplay=True)
-    mikuji_result = ft.Image(
-        src="mikuji_result.jpg",
-        height=HEIGHT*0.6
+    badge = ft.Image(
+        src="budge_result.jpg",
+        height=HEIGHT*0.55
     )
     clap = ft.Image(
         src="clap.gif",
@@ -578,7 +580,7 @@ def main(page: ft.Page):
                 )
             )
 
-        #拍手検知
+        #拍手検知：ログインなし
         if page.route == "/03_photo":
             #take_photo(),
             music.release(),
@@ -593,7 +595,7 @@ def main(page: ft.Page):
                                 ft.Row([
                                     ft.Text(
                                         "てを2回たたいてみよう！",
-                                        size=60,
+                                        size=80,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
                                         weight=ft.FontWeight.W_900
@@ -602,7 +604,7 @@ def main(page: ft.Page):
                                 ft.Row([
                                     ft.Text(
                                         "タイミングよくたたいてね",
-                                        size=30,
+                                        size=50,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
                                         weight=ft.FontWeight.W_900
@@ -610,20 +612,8 @@ def main(page: ft.Page):
                                 ]),
                                 ft.Row([
                                     clap
-                                ], alignment=ft.MainAxisAlignment.CENTER),
-                                ft.Row([
-                                    ft.ElevatedButton(
-                                    content=ft.Text(
-                                        "もどる",
-                                        size=25,
-                                        font_family="button"
-                                    ),
-                                    width=120,
-                                    height=80,
-                                    on_click=open_2_exchange
-                                )
-                                ], alignment=ft.MainAxisAlignment.START),
-                            ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
+                                ], alignment=ft.MainAxisAlignment.CENTER)
+                            ], alignment=ft.MainAxisAlignment.SPACE_AROUND),
                             width=WIDTH,
                             height=HEIGHT - BAR_HEIGHT
                         )
@@ -708,13 +698,13 @@ def main(page: ft.Page):
                                 ft.Row([
                                     count_down,
                                     ft.Text(
-                                        "測定中！",
-                                        size=100,
+                                        "【測定中】笑顔で取ると親密度アップ！",
+                                        size=90,
                                         color=ft.colors.BLACK,
                                         font_family="maru",
                                         weight=ft.FontWeight.W_900
                                     )
-                                ], alignment=ft.MainAxisAlignment.START),
+                                ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     friendly_score
                                 ], alignment=ft.MainAxisAlignment.CENTER),
@@ -770,29 +760,30 @@ def main(page: ft.Page):
                                     )
                                 ]),
                                 ft.Row([
-                                    ft.ElevatedButton(
-                                        content=ft.Text(
-                                            "お年玉ボックスにに記憶させる",
-                                            size=70,
-                                            font_family="button"
-                                        ),
-                                        width=1000,
-                                        height=100,
-                                        on_click=open_1_token
-                                    )
+                                    badge, photo
                                 ], alignment=ft.MainAxisAlignment.CENTER),
                                 ft.Row([
                                     ft.ElevatedButton(
-                                    content=ft.Text(
-                                        "終了する",
-                                        size=25,
-                                        font_family="button"
+                                        content=ft.Text(
+                                            "そのままお年玉を受け取る",
+                                            size=60,
+                                            font_family="button"
+                                        ),
+                                        width=900,
+                                        height=100,
+                                        on_click=open_3_photo
                                     ),
-                                    width=120,
-                                    height=80,
-                                    on_click=open_00_top
-                                )
-                                ], alignment=ft.MainAxisAlignment.START),
+                                    ft.ElevatedButton(
+                                        content=ft.Text(
+                                            "今日の思い出を覚えさせる",
+                                            size=60,
+                                            font_family="button"
+                                        ),
+                                        width=900,
+                                        height=100,
+                                        on_click=open_1_token
+                                    )
+                                ], alignment=ft.MainAxisAlignment.CENTER)
                             ], alignment=ft.MainAxisAlignment.SPACE_EVENLY),
                             width=WIDTH,
                             height=HEIGHT - BAR_HEIGHT
@@ -949,6 +940,8 @@ def main(page: ft.Page):
             if values:
                 average = int(sum(values) / len(values))
                 print("親密度：" + str(average))
+                out_avr=str(average) + "%"
+                generate_omikuji_image("spotApp/assets/badge.jpg", "spotApp/DelaGothicOne-Regular.ttf", out_avr, "spotApp/assets/budge_result.jpg")
                 page.go("/06_completed")
             else:
                 page.go("/07_failed")
@@ -956,6 +949,9 @@ def main(page: ft.Page):
     #撮影失敗
     def open_7_failed():
         page.go("/07_failed")
+
+    def open_8_end_nologin():
+        page.go("/08_end_nologin")
 
     #------
     #イベントの登録
