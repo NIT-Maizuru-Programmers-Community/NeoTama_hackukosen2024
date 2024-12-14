@@ -26,8 +26,11 @@ const AddPerson = () => {
 			collection(db, "Users", user.uid, "Exchangers")
 		);
 		const exchanges = querySnapshot.docs.map((doc) => {
-			return doc.data();
+			const docData = doc.data();
+			docData.time_stamp = docData.time_stamp.toDate();
+			return docData;
 		});
+		exchanges.sort((a, b) => b.time_stamp - a.time_stamp);
 		setExchangers(exchanges);
 		console.log(exchanges);
 	};
@@ -36,6 +39,7 @@ const AddPerson = () => {
 		if (addWord === "") return;
 		await addDoc(collection(db, "Users", user.uid, "Exchangers"), {
 			name: addWord,
+			time_stamp: new Date(),
 		});
 		setAddWord("");
 		getAllNames();
@@ -48,7 +52,7 @@ const AddPerson = () => {
 			<div className='justify-between flex'>
 				<Input
 					className=' ml-2 my-2'
-					placeholder='追加する交換相手の名前を入力'
+					placeholder='追加する渡す相手の名前を入力'
 					onChange={(e) => setAddWord(e.target.value)}
 					value={addWord}
 				/>

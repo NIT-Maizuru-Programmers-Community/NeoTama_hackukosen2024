@@ -7,6 +7,13 @@ import { Link, Navigate, useNavigate } from "react-router-dom";
 import { signOut } from "firebase/auth";
 import { collection, getDocs } from "firebase/firestore";
 import { Plus, UserPlus } from "lucide-react";
+import {
+	Card,
+	CardHeader,
+	CardTitle,
+	CardContent,
+	CardFooter,
+} from "./ui/card";
 
 const Home = () => {
 	const [user] = useAuthState(auth);
@@ -17,7 +24,13 @@ const Home = () => {
 			collection(db, "Users", user.uid, "Collections")
 		);
 		const allDatas = querySnapshot.docs.map((doc) => {
-			return doc.data();
+			const docData = doc.data();
+			docData.time_stamp = docData.time_stamp.toDate();
+			return docData;
+		});
+		allDatas.sort((a, b) => b.time_stamp - a.time_stamp);
+		allDatas.forEach((data) => {
+			data.time_stamp = data.time_stamp.toLocaleString();
 		});
 		setAllDatas(allDatas);
 		console.log(allDatas);
@@ -55,7 +68,19 @@ const Home = () => {
 			<main className='flex flex-col items-center gap-6 p-4 flex-grow'>
 				{allDatas.length === 0 && <p>データがありません</p>}
 				{allDatas &&
-					allDatas.map((data, index) => <img src={data.url} key={index} />)}
+					allDatas.map((data, index) => (
+						<Card key={index} className='w-full'>
+							<CardHeader>
+								<CardTitle className='text-center'>
+									渡した相手：{data.name}
+								</CardTitle>
+							</CardHeader>
+							<CardContent className='text-center'>
+								<img src={data.url} alt={data.title} className='w-full' />
+								<p>{data.time_stamp}</p>
+							</CardContent>
+						</Card>
+					))}
 			</main>
 			<div className='fixed bottom-2 left-2 rounded-full text-center'>
 				<Button className='w-16 h-16 rounded-full'>
