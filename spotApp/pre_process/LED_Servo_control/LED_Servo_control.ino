@@ -116,7 +116,7 @@ void setAllPixels(uint32_t color) {
 void open() {
   digitalWrite(IN1, HIGH); 
   digitalWrite(IN2, LOW);
-  delay(4950);                        // 5.5秒動作
+  delay(2500);                        // 5.5秒動作
 
   digitalWrite(IN1, LOW); 
   digitalWrite(IN2, LOW);
@@ -127,7 +127,7 @@ void close() {
   digitalWrite(LED_BUILTIN, HIGH);    // LEDを点灯
   digitalWrite(IN1, LOW); 
   digitalWrite(IN2, HIGH);
-  delay(4900);                        // 5.6秒動作
+  delay(2450);                        // 5.6秒動作
 
   digitalWrite(LED_BUILTIN, LOW);     // LEDを消灯
   digitalWrite(IN1, LOW); 

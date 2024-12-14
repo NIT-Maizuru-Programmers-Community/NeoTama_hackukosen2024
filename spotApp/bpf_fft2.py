@@ -16,7 +16,7 @@ def wait_hands_clap():
     #nChannels = 2
     recDuration = 0.2 #録音１回の時間
 
-    amplitude_border = 0.20 # 振幅の閾値
+    amplitude_border = 1.2 # 振幅の閾値
     clap_cnt = 0
     rec_cnt = 1
     rec_cnt_max = 5 # 2回目の拍手を何録音分待機するか
