@@ -26,8 +26,11 @@ const AddPerson = () => {
 			collection(db, "Users", user.uid, "Exchangers")
 		);
 		const exchanges = querySnapshot.docs.map((doc) => {
-			return doc.data();
+			const docData = doc.data();
+			docData.time_stamp = docData.time_stamp.toDate();
+			return docData;
 		});
+		exchanges.sort((a, b) => b.time_stamp - a.time_stamp);
 		setExchangers(exchanges);
 		console.log(exchanges);
 	};
@@ -36,6 +39,7 @@ const AddPerson = () => {
 		if (addWord === "") return;
 		await addDoc(collection(db, "Users", user.uid, "Exchangers"), {
 			name: addWord,
+			time_stamp: new Date(),
 		});
 		setAddWord("");
 		getAllNames();

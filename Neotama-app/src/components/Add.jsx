@@ -30,7 +30,6 @@ const Add = () => {
 	const [exchangername, setExchangername] = useState("");
 	const [user] = useAuthState(auth);
 	const navigate = useNavigate();
-	const [data, setData] = useState();
 	const handleSearch = async () => {
 		try {
 			// ドキュメント参照を作成
@@ -39,7 +38,11 @@ const Add = () => {
 
 			if (docSnap.exists()) {
 				const data = docSnap.data();
-				setData(data);
+				if (data.name !== "" && data.display_name !== "" && data.id !== "") {
+					alert("認証済みのコードです");
+					setSearchWord("");
+					return;
+				}
 				setMatch(true);
 				setImageURL(data.url); // ドキュメント内のurlフィールドを取得
 			} else {
@@ -56,7 +59,7 @@ const Add = () => {
 		try {
 			// ドキュメント参照を作成
 			if (exchangername === "") {
-				alert("交換相手を選択してください");
+				alert("渡す相手を選択してください");
 				return;
 			}
 			const docRef = doc(db, "Hard", searchWord); // "Hard"コレクション内の特定のドキュメントIDを指定
@@ -65,15 +68,18 @@ const Add = () => {
 				id: user.uid,
 				name: exchangername,
 			});
+			const docSnap = await getDoc(docRef);
+			const data = docSnap.data();
+			submitAdd(data);
 			alert("認証に成功しました");
-			submitAdd();
+			setSearchWord("");
 			navigate("/");
 		} catch (error) {
 			console.error("データ更新エラー:", error);
 			alert("データの更新に失敗しました");
 		}
 	};
-	const submitAdd = async () => {
+	const submitAdd = async (data) => {
 		await addDoc(collection(db, "Users", user.uid, "Collections"), {
 			display_name: data.display_name,
 			id: data.id,
@@ -87,8 +93,11 @@ const Add = () => {
 			collection(db, "Users", user.uid, "Exchangers")
 		);
 		const exchanges = querySnapshot.docs.map((doc) => {
-			return doc.data();
+			const docData = doc.data();
+			docData.time_stamp = docData.time_stamp.toDate();
+			return docData;
 		});
+		exchanges.sort((a, b) => b.time_stamp - a.time_stamp);
 		setExchangers(exchanges);
 		console.log(exchanges);
 	};
@@ -102,16 +111,17 @@ const Add = () => {
 				<Input
 					className=' ml-2 my-2'
 					placeholder='認証コードを入力'
+					value={searchWord}
 					onChange={(e) => setSearchWord(e.target.value)}
 				/>
 				<Button className='mx-2 my-2' onClick={handleSearch}>
 					検索
 				</Button>
 			</div>
-			<div className='w-screen px-2'>
+			<div className='w-screen px-2 pb-2'>
 				<Select onValueChange={(value) => setExchangername(value)}>
 					<SelectTrigger className='w-full'>
-						<SelectValue placeholder='交換相手を選択' />
+						<SelectValue placeholder='渡す相手を選択' />
 					</SelectTrigger>
 					<SelectContent>
 						{exchangers.map((exchanger, index) => (
@@ -122,10 +132,12 @@ const Add = () => {
 					</SelectContent>
 				</Select>
 			</div>
-			{match && <img src={imageURL} alt='検索結果' className='w-full' />}
+			<div className='px-2'>
+				{match && <img src={imageURL} alt='検索結果' className='w-full' />}
+			</div>
 			<div className='w-screen p-2'>
 				{match && (
-					<Button className='w-full my-2' onClick={handleUpload}>
+					<Button className='w-full mb-2' onClick={handleUpload}>
 						認証する
 					</Button>
 				)}
