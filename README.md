@@ -46,6 +46,6 @@ LINE ヤフー社主催、Hack U KOSEN 2024 優秀賞獲得！ありがとうご
 - [HIRATA Soma / 4 年電気情報工学科](https://github.com/s-hirata0831)
 - [FUJII Koki / 4 年電気情報工学科](https://github.com/kouki-f)
 - [ISE Takumi / 4 年電気情報工学科](https://github.com/Ise2005)
-- SAKATA Yuya / 3年電気情報工学科
+- [SAKATA Yuya / 3年電気情報工学科](https://github.com/SakanaYuya)
 - [TSUJIMOTO Kento / 2 年電気情報工学科](https://github.com/Saba3939)
 - [HIZUME Kazushi / 2 年電子制御工学科](https://github.com/hizumekazushi)
